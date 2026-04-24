@@ -18,7 +18,6 @@
       border-color: #1d4ed8;
       box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1);
     }
-    /* 新增：自訂核取方塊與滑鼠指標樣式 */
     input[type="checkbox"] {
       cursor: pointer;
     }
@@ -47,13 +46,54 @@
         <p class="text-blue-800 font-bold text-xl tracking-widest">正在從雲端載入表單配置...</p>
       </div>
 
-      <!-- 表單本體 (初始隱藏，待資料載入後顯示) -->
+      <!-- 表單本體 -->
       <form id="safetyForm" class="bg-slate-50 p-6 md:p-10 rounded-b-3xl shadow-2xl space-y-8 hidden">
         
+        <!-- ================= [新增] 頂部 Google 驗證區塊 ================= -->
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h3 class="flex items-center text-lg md:text-xl font-black text-slate-800 mb-1">
+              <div class="w-1.5 h-6 bg-red-500 rounded-full mr-3"></div>身分驗證 <span class="text-red-500 ml-1 text-xl">*</span>
+            </h3>
+            <p class="text-sm font-bold text-slate-500 ml-4">提交表單前需驗證 Google 帳號 (可先填寫下方資料)</p>
+          </div>
+
+          <!-- 未登入狀態按鈕 -->
+          <button type="button" id="topLoginBtn" class="bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 font-bold py-3 px-6 rounded-xl shadow-sm transition-all flex items-center">
+            <i class="fab fa-google text-red-500 mr-3 text-lg"></i> 登入 Google
+          </button>
+
+          <!-- 已登入狀態資訊 -->
+          <div id="topUserInfo" class="hidden flex items-center space-x-3 bg-slate-100 py-2 px-4 rounded-xl border border-slate-200">
+            <img id="topUserAvatar" src="" class="w-10 h-10 rounded-full shadow-sm" alt="Avatar">
+            <div class="text-left">
+              <p id="topUserName" class="text-sm font-black text-slate-800 leading-tight"></p>
+              <p id="topUserEmail" class="text-xs font-bold text-slate-500"></p>
+            </div>
+            <button type="button" id="topLogoutBtn" class="ml-2 text-xs font-bold text-slate-400 hover:text-red-500 underline transition-colors">登出</button>
+          </div>
+        </div>
+        <!-- ============================================================= -->
+
         <!-- 動態題目將被渲染在這裡 -->
         <div id="dynamicFields" class="space-y-8"></div>
 
-        <button type="submit" id="submitBtn" class="w-full bg-blue-800 hover:bg-black text-white font-black py-6 rounded-3xl shadow-2xl text-2xl transition-all">
+        <!-- ================= [新增] 底部刷淡驗證區塊 ================= -->
+        <div class="pt-4 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-300">
+          <div id="bottomUnauth" class="flex items-center space-x-3">
+            <span class="text-sm font-bold text-slate-500">尚未登入，將無法提交表單</span>
+            <button type="button" id="bottomLoginBtn" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 py-1.5 px-3 rounded-lg flex items-center font-bold">
+              <i class="fab fa-google text-red-500 mr-2"></i>登入
+            </button>
+          </div>
+          <div id="bottomAuth" class="hidden flex items-center space-x-2">
+            <i class="fas fa-check-circle text-emerald-500"></i>
+            <span class="text-sm font-bold text-slate-600">已使用 <span id="bottomUserEmail" class="text-slate-800"></span> 登入</span>
+          </div>
+        </div>
+        <!-- ============================================================= -->
+
+        <button type="submit" id="submitBtn" class="w-full bg-blue-800 hover:bg-black text-white font-black py-6 rounded-3xl shadow-2xl text-2xl transition-all flex justify-center items-center">
           確認提交 (Confirm Submission)
         </button>
       </form>
@@ -72,10 +112,25 @@
     </div>
   </div>
 
+  <!-- [新增] 攔截未登入彈窗 (Modal) -->
+  <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center opacity-0 transition-opacity duration-300">
+    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl max-w-sm w-full mx-4 text-center transform scale-95 transition-transform duration-300" id="loginModalContent">
+      <i class="fas fa-user-lock text-6xl text-blue-600 mb-6"></i>
+      <h3 class="text-2xl font-black text-slate-800 mb-3">需要登入以驗證身分</h3>
+      <p class="text-slate-500 font-bold mb-8 text-sm leading-relaxed">請先登入您的 Google 帳號才能提交表單。<br>別擔心，您剛剛填寫的資料皆已保留。</p>
+      <button type="button" id="modalLoginBtn" class="w-full bg-white border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 font-black py-4 rounded-xl shadow-sm transition-all flex items-center justify-center text-lg mb-4">
+        <i class="fab fa-google text-red-500 mr-3 text-xl"></i> 立即登入 Google
+      </button>
+      <button type="button" id="modalCloseBtn" class="text-sm font-bold text-slate-400 hover:text-slate-600 underline tracking-wide">稍後再說，先返回表單</button>
+    </div>
+  </div>
+
   <!-- Firebase 與核心邏輯 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // 引入 Auth 模組
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     // Firebase 專案設定
     const firebaseConfig = {
@@ -89,15 +144,100 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    // 初始化 Auth
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-    // 全域變數
     let schemaQuestions = [];
     let successMessageText = "Submission Successful";
+    let currentUser = null; // 紀錄當前登入者
 
-    // 啟動時立即執行資料抓取與渲染
+    // ==========================================
+    // 驗證 UI 與邏輯 (Authentication)
+    // ==========================================
+    const topLoginBtn = document.getElementById('topLoginBtn');
+    const topUserInfo = document.getElementById('topUserInfo');
+    const topUserName = document.getElementById('topUserName');
+    const topUserEmail = document.getElementById('topUserEmail');
+    const topUserAvatar = document.getElementById('topUserAvatar');
+    const topLogoutBtn = document.getElementById('topLogoutBtn');
+
+    const bottomUnauth = document.getElementById('bottomUnauth');
+    const bottomAuth = document.getElementById('bottomAuth');
+    const bottomLoginBtn = document.getElementById('bottomLoginBtn');
+    const bottomUserEmail = document.getElementById('bottomUserEmail');
+
+    const loginModal = document.getElementById('loginModal');
+    const loginModalContent = document.getElementById('loginModalContent');
+    const modalLoginBtn = document.getElementById('modalLoginBtn');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+    // 監聽登入狀態改變
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user) {
+        // 已登入：更新頂部
+        topLoginBtn.classList.add('hidden');
+        topUserInfo.classList.remove('hidden');
+        topUserName.innerText = user.displayName || '訪客';
+        topUserEmail.innerText = user.email;
+        topUserAvatar.src = user.photoURL || 'https://via.placeholder.com/40';
+        
+        // 已登入：更新底部
+        bottomUnauth.classList.add('hidden');
+        bottomAuth.classList.remove('hidden');
+        bottomUserEmail.innerText = user.email;
+
+        // 如果 modal 開著就關掉它
+        closeModal();
+      } else {
+        // 未登入：還原介面
+        topLoginBtn.classList.remove('hidden');
+        topUserInfo.classList.add('hidden');
+        bottomUnauth.classList.remove('hidden');
+        bottomAuth.classList.add('hidden');
+      }
+    });
+
+    // 觸發 Google 登入
+    const handleLogin = async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        console.error("登入錯誤:", error);
+        alert("登入失敗，請稍後再試！\n" + error.message);
+      }
+    };
+
+    // 觸發登出
+    const handleLogout = () => signOut(auth);
+
+    // 綁定登入/登出按鈕事件
+    topLoginBtn.addEventListener('click', handleLogin);
+    bottomLoginBtn.addEventListener('click', handleLogin);
+    modalLoginBtn.addEventListener('click', handleLogin);
+    topLogoutBtn.addEventListener('click', handleLogout);
+
+    // Modal 控制
+    const openModal = () => {
+      loginModal.classList.remove('hidden');
+      setTimeout(() => {
+        loginModal.classList.remove('opacity-0');
+        loginModalContent.classList.remove('scale-95');
+      }, 10);
+    };
+    const closeModal = () => {
+      loginModal.classList.add('opacity-0');
+      loginModalContent.classList.add('scale-95');
+      setTimeout(() => loginModal.classList.add('hidden'), 300);
+    };
+    modalCloseBtn.addEventListener('click', closeModal);
+
+    // ==========================================
+    // 表單初始載入與渲染 (動態)
+    // ==========================================
     window.addEventListener('DOMContentLoaded', async () => {
       try {
-        // 1. 獲取表單「設定 (Config)」
         const configSnap = await getDoc(doc(db, "form_app", "config"));
         if (configSnap.exists()) {
           const config = configSnap.data();
@@ -105,14 +245,12 @@
           if (config.FORM_SUBTITLE) document.getElementById('subTitle').innerText = config.FORM_SUBTITLE;
           if (config.SUCCESS_MSG) successMessageText = config.SUCCESS_MSG;
           
-          // 若設定檔標示停用，則隱藏按鈕並提示
           if (config.IS_ACTIVE === false || config.IS_ACTIVE === 'FALSE') {
             document.getElementById('loadingOverlay').innerHTML = `<p class="text-red-600 font-black text-2xl">表單目前尚未開放填寫 (Form is currently closed)</p>`;
             return; 
           }
         }
 
-        // 2. 獲取表單「題目 (Schema)」
         const schemaSnap = await getDoc(doc(db, "form_app", "schema"));
         if (schemaSnap.exists()) {
           schemaQuestions = schemaSnap.data().questions || [];
@@ -121,7 +259,6 @@
           throw new Error("無法取得題目配置");
         }
 
-        // 隱藏載入中，顯示表單
         document.getElementById('loadingOverlay').classList.add('hidden');
         document.getElementById('safetyForm').classList.remove('hidden');
 
@@ -131,21 +268,16 @@
       }
     });
 
-    /**
-     * 負責將 JSON Schema 轉換為美觀的 Tailwind HTML 介面
-     */
     function renderDynamicForm(questions) {
       const container = document.getElementById('dynamicFields');
       container.innerHTML = '';
       
       questions.forEach(q => {
-        // 檢查是否必填 (容許布林值或字串)
         const isRequired = q.required === true || String(q.required).toUpperCase() === 'TRUE';
         const reqMark = isRequired ? '<span class="text-red-500 ml-1 text-xl">*</span>' : '';
         const options = q.options ? q.options.split('|').map(o => o.trim()).filter(o => o) : [];
         let html = '';
 
-        // 統一的區塊容器與標題樣式 (呈現俐落的白色卡片)
         const sectionWrapperStart = `
           <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300">
             <h3 class="flex items-center text-lg md:text-xl font-black text-slate-800 mb-5">
@@ -164,7 +296,6 @@
           ` + sectionWrapperEnd;
         } 
         else if (q.type === 'radio') {
-          // 動態排版：選項少於等於4則以網格顯示，否則2欄顯示
           const gridCols = options.length <= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'md:grid-cols-2';
           let optsHtml = options.map((opt, i) => `
             <div class="flex">
@@ -175,11 +306,9 @@
               </label>
             </div>
           `).join('');
-
           html = sectionWrapperStart + `<div class="grid grid-cols-1 ${gridCols} gap-3">${optsHtml}</div>` + sectionWrapperEnd;
         } 
         else if (q.type === 'checkbox') {
-          // 針對特殊選項進行配色微調，但保持結構完全一致的卡片風格
           if (q.id === 'agreement') {
             let optsHtml = options.map((opt, i) => `
               <label class="flex items-start p-5 md:p-6 bg-emerald-50/50 border-2 border-emerald-300 rounded-xl cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all group">
@@ -199,7 +328,6 @@
             html = sectionWrapperStart + `<div class="grid grid-cols-1 gap-3">${optsHtml}</div>` + sectionWrapperEnd;
           } 
           else {
-            // 預設 Checkbox (例如：安全行為準則)
             let optsHtml = options.map((opt, i) => `
               <label class="flex items-center p-4 bg-slate-50/50 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all group">
                 <input type="checkbox" name="${q.id}" value="${opt}" ${isRequired ? 'required' : ''} class="w-6 h-6 mr-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 flex-shrink-0 cursor-pointer">
@@ -212,25 +340,37 @@
         container.insertAdjacentHTML('beforeend', html);
       });
 
-      // 自動填寫今日日期
       document.querySelectorAll('.date-auto-fill').forEach(el => {
         el.value = new Date().toISOString().split('T')[0];
       });
     }
 
-    // 處理表單送出
+    // ==========================================
+    // 提交邏輯 (包含驗證檢查)
+    // ==========================================
     const form = document.getElementById('safetyForm');
     const submitBtn = document.getElementById('submitBtn');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault(); 
+      
+      // [關鍵新增] 攔截：若未登入，禁止提交並彈出提示
+      if (!currentUser) {
+        openModal();
+        return; 
+      }
+
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>正在儲存中 (Saving)...';
 
       const formData = new FormData(form);
-      const submissionData = { createdAt: serverTimestamp() };
+      
+      // 加入登入者資訊以備查
+      const submissionData = { 
+        createdAt: serverTimestamp(),
+        submitterEmail: currentUser.email, // 紀錄登入信箱
+      };
 
-      // 動態擷取所有被定義在 Schema 中的欄位資料
       schemaQuestions.forEach(q => {
         if (q.type === 'checkbox') {
           submissionData[q.id] = formData.getAll(q.id).join(", ");
@@ -251,11 +391,10 @@
         alert("寫入失敗：" + error.message);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerText = "確認提交 (Confirm Submission)";
+        submitBtn.innerHTML = '確認提交 (Confirm Submission)';
       }
     });
 
-    // 重新填寫按鈕
     document.getElementById('resetBtn').addEventListener('click', () => {
       form.reset();
       document.querySelectorAll('.date-auto-fill').forEach(el => el.value = new Date().toISOString().split('T')[0]);
