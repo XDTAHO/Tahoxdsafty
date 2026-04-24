@@ -52,6 +52,7 @@
         </button>
       </div>
 
+      <!-- 表單標頭 -->
       <div class="bg-white rounded-t-3xl border-b-8 border-blue-800 shadow-2xl overflow-hidden">
         <div class="bg-gradient-to-r from-blue-800 to-blue-600 p-8 md:p-10 text-white text-center">
           <div class="flex items-center justify-center space-x-3 mb-4">
@@ -68,7 +69,8 @@
       </div>
 
       <form id="safetyForm" class="bg-white p-6 md:p-12 rounded-b-3xl shadow-2xl space-y-10">
-        <!-- 基本資料 -->
+        
+        <!-- 1 & 2. 基本資料 -->
         <section class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border-2 border-slate-200 shadow-sm">
           <div class="space-y-2">
             <label class="block text-blue-900 font-black text-sm">1. 真實姓名 (Name) *</label>
@@ -80,7 +82,7 @@
           </div>
         </section>
 
-        <!-- 身份選擇 -->
+        <!-- 3. 身份選擇 -->
         <section class="space-y-4">
           <label class="block text-slate-800 font-black text-lg border-l-8 border-blue-700 pl-4">3. 您的身份 / Role *</label>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -91,12 +93,53 @@
           </div>
         </section>
 
+        <!-- 4. 日期 -->
         <section class="p-6 bg-slate-50 rounded-2xl border-2 border-slate-200">
           <label class="block text-slate-800 font-black text-sm mb-3">4. 日期 (Date)</label>
           <input type="date" name="entry.2111844014" id="todayDate" class="w-full md:w-64 border-2 border-slate-300 rounded-xl p-4 bg-white font-bold outline-none">
         </section>
 
-        <!-- 提交按鈕 -->
+        <!-- 5. 主要風險危害區域 -->
+        <section class="space-y-4">
+          <label class="block text-slate-800 font-black text-lg border-l-8 border-blue-700 pl-4">5. 主要風險危害區域告知 *</label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="flex"><input type="radio" name="entry.1021951042" id="risk1" value="威立雅安全政策 (Veolia Safety Policy)" class="card-selector hidden" required><label for="risk1" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-file-shield mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">威立雅安全政策</span></label></div>
+            <div class="flex"><input type="radio" name="entry.1021951042" id="risk2" value="威立雅十大求生規則 (12 LSR & HRMS)" class="card-selector hidden"><label for="risk2" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-clipboard-list mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">十大求生規則</span></label></div>
+            <div class="flex"><input type="radio" name="entry.1021951042" id="risk3" value="車輛/堆高機作業區域 (Vehicle/Forklift Operation Areas)" class="card-selector hidden"><label for="risk3" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-truck-moving mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">車輛作業區域</span></label></div>
+            <div class="flex"><input type="radio" name="entry.1021951042" id="risk4" value="高溫/高壓區域 (High Temperature/High Pressure Areas)" class="card-selector hidden"><label for="risk4" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-temperature-high mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">高溫/高壓區域</span></label></div>
+          </div>
+        </section>
+
+        <!-- 6. 安全行為準則 -->
+        <section class="bg-blue-50 p-6 md:p-8 rounded-3xl border-2 border-blue-200 shadow-inner space-y-4">
+          <p class="font-black text-blue-900 flex items-center"><i class="fas fa-check-double mr-2"></i>6. 安全行為準則 (請全數勾選)</p>
+          <div class="grid grid-cols-1 gap-3">
+            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="entry.339193093" value="同意 (Agree)" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">配戴必要的個人防護裝備 (PPE)</span></label>
+            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="entry.1092091010" value="同意 (Agree)" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">遵守所有安全標誌與警告</span></label>
+            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="entry.1982857503" value="同意 (Agree)" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">不隨意動火或吸煙</span></label>
+            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="entry.1160474227" value="同意 (Agree)" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">發現不安全狀況立即通知管理單位</span></label>
+          </div>
+        </section>
+
+        <!-- 7. 緊急應變 -->
+        <section class="space-y-4">
+          <label class="block text-slate-800 font-black text-lg border-l-8 border-blue-700 pl-4">7. 緊急應變資訊 *</label>
+          <div class="grid grid-cols-1 gap-3">
+            <label class="flex items-center p-5 bg-amber-50 border-2 border-amber-200 rounded-2xl cursor-pointer shadow-sm">
+              <input type="checkbox" name="entry.1552646900" value="我已獲知緊急集合點位置" required class="w-7 h-7 mr-4 text-amber-600">
+              <span class="text-xs font-bold text-amber-900 leading-tight uppercase tracking-tight">我已獲知緊急集合點位置 (I am aware of Emergency Meeting Point)</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- 最終確認 -->
+        <section class="pt-6 border-t-4 border-slate-100">
+          <label class="flex items-start p-8 bg-emerald-700 rounded-3xl cursor-pointer shadow-xl hover:bg-emerald-800 transition-all">
+            <input type="checkbox" name="entry.822252265" value="同意 (Agree)" required class="w-8 h-8 mr-4 flex-shrink-0">
+            <span class="text-lg font-black text-white leading-tight">我完全理解並將嚴格遵守上述安全公告的規定。(I understand and will follow the rules.)</span>
+          </label>
+        </section>
+
         <button type="submit" id="submitBtn" class="w-full bg-blue-800 hover:bg-black text-white font-black py-6 rounded-3xl shadow-2xl text-2xl transition-all">
           確認提交安全申報 (Confirm Submission)
         </button>
@@ -109,7 +152,9 @@
         <i class="fas fa-check-double"></i>
       </div>
       <h2 class="text-4xl font-black text-slate-800">提交成功！</h2>
-      <button onclick="resetForm()" class="bg-blue-800 hover:bg-blue-900 text-white font-black py-4 px-12 rounded-2xl transition-all">填寫下一份</button>
+      <button onclick="resetForm()" class="bg-blue-800 hover:bg-blue-900 text-white font-black py-4 px-12 rounded-2xl transition-all shadow-lg active:scale-95">
+        填寫下一份 (Fill another)
+      </button>
     </div>
   </div>
 
@@ -130,7 +175,7 @@
       measurementId: "G-7EZNY89CC6"
     };
 
-    // 2. GAS Web App 網址 (請確保已部署為「所有人」存取)
+    // 2. GAS Web App 網址 (請務必重新部署並確認為「所有人」存取)
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwcW7PrL4Dd110QzngTQ3jPIh3Z7czdYyG9lX0Hqh5fp6jp-aKun0KSlRndDk25mosF/exec";
 
     // 初始化 Firebase
@@ -171,13 +216,21 @@
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>處理中...';
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>正在儲存中 (Saving)...';
 
       try {
         const idToken = await getIdToken(user, true);
         const formData = new FormData(e.target);
         const data = {};
-        formData.forEach((value, key) => data[key] = value);
+        
+        // 收集所有欄位 (包含 Checkbox 多選處理)
+        formData.forEach((value, key) => {
+          if (!data[key]) {
+            data[key] = value;
+          } else {
+            data[key] = data[key] + ", " + value;
+          }
+        });
 
         const response = await fetch(GAS_WEB_APP_URL, {
           method: 'POST',
@@ -195,9 +248,9 @@
           throw new Error(result.message);
         }
       } catch (err) {
-        alert("提交失敗：" + err.message);
+        alert("提交失敗 (Error)：" + err.message);
         btn.disabled = false;
-        btn.innerText = "確認提交安全申報";
+        btn.innerText = "確認提交安全申報 (Confirm Submission)";
       }
     });
 
@@ -209,6 +262,7 @@
       document.getElementById('formContainer').classList.remove('hidden');
       document.getElementById('submitBtn').disabled = false;
       document.getElementById('submitBtn').innerText = "確認提交安全申報 (Confirm Submission)";
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     };
   </script>
 </body>
