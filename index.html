@@ -29,7 +29,7 @@
     <!-- 整個表單的容器 -->
     <div id="formContainer">
       
-      <!-- 表單頭部 (標題將由 Firebase 動態載入) -->
+      <!-- 表單頭部 -->
       <div class="bg-white rounded-t-3xl border-b-8 border-blue-800 shadow-2xl overflow-hidden">
         <div class="bg-gradient-to-r from-blue-800 to-blue-600 p-8 md:p-10 text-white text-center">
           <div class="flex items-center justify-center space-x-3 mb-4">
@@ -49,21 +49,25 @@
       <!-- 表單本體 -->
       <form id="safetyForm" class="bg-slate-50 p-6 md:p-10 rounded-b-3xl shadow-2xl space-y-8 hidden">
         
-        <!-- ================= [新增] 頂部 Google 驗證區塊 ================= -->
+        <!-- ================= [新增] 多語系切換區塊 ================= -->
+        <div id="langSwitcher" class="flex flex-wrap gap-2 pb-2 border-b-2 border-slate-200">
+          <!-- 語言按鈕將由 JS 動態生成 -->
+        </div>
+        <!-- ========================================================= -->
+
+        <!-- 頂部 Google 驗證區塊 -->
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h3 class="flex items-center text-lg md:text-xl font-black text-slate-800 mb-1">
-              <div class="w-1.5 h-6 bg-red-500 rounded-full mr-3"></div>身分驗證 <span class="text-red-500 ml-1 text-xl">*</span>
+              <div class="w-1.5 h-6 bg-red-500 rounded-full mr-3"></div><span id="authTitleText">身分驗證</span> <span class="text-red-500 ml-1 text-xl">*</span>
             </h3>
-            <p class="text-sm font-bold text-slate-500 ml-4">提交表單前需驗證 Google 帳號 (可先填寫下方資料)</p>
+            <p id="authDesc" class="text-sm font-bold text-slate-500 ml-4">提交表單前需驗證 Google 帳號 (可先填寫下方資料)</p>
           </div>
 
-          <!-- 未登入狀態按鈕 -->
           <button type="button" id="topLoginBtn" class="bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 font-bold py-3 px-6 rounded-xl shadow-sm transition-all flex items-center">
-            <i class="fab fa-google text-red-500 mr-3 text-lg"></i> 登入 Google
+            <i class="fab fa-google text-red-500 mr-3 text-lg"></i> <span id="topLoginBtnText">登入 Google</span>
           </button>
 
-          <!-- 已登入狀態資訊 -->
           <div id="topUserInfo" class="hidden flex items-center space-x-3 bg-slate-100 py-2 px-4 rounded-xl border border-slate-200">
             <img id="topUserAvatar" src="" class="w-10 h-10 rounded-full shadow-sm" alt="Avatar">
             <div class="text-left">
@@ -73,28 +77,26 @@
             <button type="button" id="topLogoutBtn" class="ml-2 text-xs font-bold text-slate-400 hover:text-red-500 underline transition-colors">登出</button>
           </div>
         </div>
-        <!-- ============================================================= -->
 
-        <!-- 動態題目將被渲染在這裡 -->
+        <!-- 動態題目渲染區塊 -->
         <div id="dynamicFields" class="space-y-8"></div>
 
-        <!-- ================= [新增] 底部刷淡驗證區塊 ================= -->
+        <!-- 底部刷淡驗證區塊 -->
         <div class="pt-4 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div id="bottomUnauth" class="flex items-center space-x-3">
-            <span class="text-sm font-bold text-slate-500">尚未登入，將無法提交表單</span>
+            <span id="bottomUnauthText" class="text-sm font-bold text-slate-500">尚未登入，將無法提交表單</span>
             <button type="button" id="bottomLoginBtn" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 py-1.5 px-3 rounded-lg flex items-center font-bold">
-              <i class="fab fa-google text-red-500 mr-2"></i>登入
+              <i class="fab fa-google text-red-500 mr-2"></i><span id="bottomLoginBtnText">登入</span>
             </button>
           </div>
           <div id="bottomAuth" class="hidden flex items-center space-x-2">
             <i class="fas fa-check-circle text-emerald-500"></i>
-            <span class="text-sm font-bold text-slate-600">已使用 <span id="bottomUserEmail" class="text-slate-800"></span> 登入</span>
+            <span class="text-sm font-bold text-slate-600"><span id="bottomAuthText1">已使用</span> <span id="bottomUserEmail" class="text-slate-800 mx-1"></span> <span id="bottomAuthText2">登入</span></span>
           </div>
         </div>
-        <!-- ============================================================= -->
 
         <button type="submit" id="submitBtn" class="w-full bg-blue-800 hover:bg-black text-white font-black py-6 rounded-3xl shadow-2xl text-2xl transition-all flex justify-center items-center">
-          確認提交 (Confirm Submission)
+          <span id="submitBtnText">確認提交 (Confirm Submission)</span>
         </button>
       </form>
     </div>
@@ -104,24 +106,29 @@
       <div class="w-32 h-32 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-6xl text-emerald-600">
         <i class="fas fa-check-double"></i>
       </div>
-      <h2 class="text-4xl font-black text-slate-800">提交成功！</h2>
+      <h2 id="successTitle" class="text-4xl font-black text-slate-800">提交成功！</h2>
       <p id="successText" class="text-slate-500 font-bold uppercase tracking-wide">Submission Successful</p>
-      <button id="resetBtn" class="bg-blue-800 hover:bg-blue-900 text-white font-black py-4 px-12 rounded-2xl shadow-lg transition-all active:scale-95">
-        填寫下一份 (Fill another)
+      <button type="button" id="resetBtn" class="bg-blue-800 hover:bg-blue-900 text-white font-black py-4 px-12 rounded-2xl shadow-lg transition-all active:scale-95">
+        <span id="resetBtnText">填寫下一份 (Fill another)</span>
       </button>
     </div>
   </div>
 
-  <!-- [新增] 攔截未登入彈窗 (Modal) -->
+  <!-- 攔截未登入彈窗 -->
   <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl max-w-sm w-full mx-4 text-center transform scale-95 transition-transform duration-300" id="loginModalContent">
       <i class="fas fa-user-lock text-6xl text-blue-600 mb-6"></i>
-      <h3 class="text-2xl font-black text-slate-800 mb-3">需要登入以驗證身分</h3>
-      <p class="text-slate-500 font-bold mb-8 text-sm leading-relaxed">請先登入您的 Google 帳號才能提交表單。<br>別擔心，您剛剛填寫的資料皆已保留。</p>
+      <h3 id="modalTitle" class="text-2xl font-black text-slate-800 mb-3">需要登入以驗證身分</h3>
+      <p class="text-slate-500 font-bold mb-8 text-sm leading-relaxed">
+        <span id="modalDesc1">請先登入您的 Google 帳號才能提交表單。</span><br>
+        <span id="modalDesc2">別擔心，您剛剛填寫的資料皆已保留。</span>
+      </p>
       <button type="button" id="modalLoginBtn" class="w-full bg-white border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 font-black py-4 rounded-xl shadow-sm transition-all flex items-center justify-center text-lg mb-4">
-        <i class="fab fa-google text-red-500 mr-3 text-xl"></i> 立即登入 Google
+        <i class="fab fa-google text-red-500 mr-3 text-xl"></i> <span id="modalLoginBtnText">立即登入 Google</span>
       </button>
-      <button type="button" id="modalCloseBtn" class="text-sm font-bold text-slate-400 hover:text-slate-600 underline tracking-wide">稍後再說，先返回表單</button>
+      <button type="button" id="modalCloseBtn" class="text-sm font-bold text-slate-400 hover:text-slate-600 underline tracking-wide">
+        <span id="modalCloseBtnText">稍後再說，先返回表單</span>
+      </button>
     </div>
   </div>
 
@@ -129,10 +136,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    // 引入 Auth 模組
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // Firebase 專案設定
     const firebaseConfig = {
       apiKey: "AIzaSyDwAD3O6uNDWQoNITdeOEc4LqfLKC_IZRQ",
       authDomain: "tahoxdsafty.firebaseapp.com",
@@ -144,81 +149,128 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    // 初始化 Auth
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
+    // 核心資料庫
     let schemaQuestions = [];
-    let successMessageText = "Submission Successful";
-    let currentUser = null; // 紀錄當前登入者
+    let configDataCache = {};
+    let currentUser = null; 
+
+    // I18N 多語系狀態
+    let currentLang = 'zh-TW'; 
+    let supportedLangs = [{code: 'zh-TW', label: '繁體中文'}]; // 預設固定為繁體中文首位
+    let i18nDicts = {}; // 儲存各語言的翻譯字典
 
     // ==========================================
-    // 驗證 UI 與邏輯 (Authentication)
+    // 多語系翻譯核心 (I18N Helper)
     // ==========================================
-    const topLoginBtn = document.getElementById('topLoginBtn');
-    const topUserInfo = document.getElementById('topUserInfo');
-    const topUserName = document.getElementById('topUserName');
-    const topUserEmail = document.getElementById('topUserEmail');
-    const topUserAvatar = document.getElementById('topUserAvatar');
-    const topLogoutBtn = document.getElementById('topLogoutBtn');
+    const t = (text) => {
+      // 若為預設中文或無翻譯字典，返回原文
+      if (currentLang === 'zh-TW' || !i18nDicts[currentLang]) return text;
+      // 回傳翻譯，若字典沒找到則回退至原文
+      return i18nDicts[currentLang][text] || text;
+    };
 
-    const bottomUnauth = document.getElementById('bottomUnauth');
-    const bottomAuth = document.getElementById('bottomAuth');
-    const bottomLoginBtn = document.getElementById('bottomLoginBtn');
-    const bottomUserEmail = document.getElementById('bottomUserEmail');
+    // ==========================================
+    // 渲染語言切換按鈕
+    // ==========================================
+    function renderLangSwitcher() {
+      const container = document.getElementById('langSwitcher');
+      container.innerHTML = '';
+      
+      supportedLangs.forEach(lang => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerText = lang.label;
+        
+        // 判斷是否為當前選中語言給予不同樣式
+        if (currentLang === lang.code) {
+          btn.className = 'px-5 py-2 bg-blue-600 text-white font-bold rounded-xl shadow-md transition-all text-sm';
+        } else {
+          btn.className = 'px-5 py-2 bg-white text-slate-600 hover:bg-blue-50 hover:text-blue-600 font-bold rounded-xl transition-all border border-slate-200 text-sm shadow-sm';
+        }
 
-    const loginModal = document.getElementById('loginModal');
-    const loginModalContent = document.getElementById('loginModalContent');
-    const modalLoginBtn = document.getElementById('modalLoginBtn');
-    const modalCloseBtn = document.getElementById('modalCloseBtn');
+        btn.onclick = () => {
+          currentLang = lang.code;
+          renderLangSwitcher(); // 更新按鈕顏色
+          updateStaticUI();     // 更新靜態文字
+          renderDynamicForm(schemaQuestions); // 重新渲染題目
+        };
+        container.appendChild(btn);
+      });
+    }
 
-    // 監聽登入狀態改變
+    // ==========================================
+    // 更新靜態文字 UI (無須重整)
+    // ==========================================
+    function updateStaticUI() {
+      // 設定檔標題
+      document.getElementById('mainTitle').innerText = t(configDataCache.FORM_TITLE || '訪客風險危害告知');
+      document.getElementById('subTitle').innerText = t(configDataCache.FORM_SUBTITLE || 'Visitor Safety and Hazard Notification');
+      document.getElementById('successText').innerText = t(configDataCache.SUCCESS_MSG || 'Submission Successful');
+
+      // 驗證區塊與按鈕
+      document.getElementById('authTitleText').innerText = t('身分驗證');
+      document.getElementById('authDesc').innerText = t('提交表單前需驗證 Google 帳號 (可先填寫下方資料)');
+      document.getElementById('topLoginBtnText').innerText = t('登入 Google');
+      document.getElementById('topLogoutBtn').innerText = t('登出');
+      document.getElementById('bottomUnauthText').innerText = t('尚未登入，將無法提交表單');
+      document.getElementById('bottomLoginBtnText').innerText = t('登入');
+      document.getElementById('bottomAuthText1').innerText = t('已使用');
+      document.getElementById('bottomAuthText2').innerText = t('登入');
+      document.getElementById('submitBtnText').innerText = t('確認提交 (Confirm Submission)');
+      
+      // 成功畫面與彈窗
+      document.getElementById('successTitle').innerText = t('提交成功！');
+      document.getElementById('resetBtnText').innerText = t('填寫下一份 (Fill another)');
+      document.getElementById('modalTitle').innerText = t('需要登入以驗證身分');
+      document.getElementById('modalDesc1').innerText = t('請先登入您的 Google 帳號才能提交表單。');
+      document.getElementById('modalDesc2').innerText = t('別擔心，您剛剛填寫的資料皆已保留。');
+      document.getElementById('modalLoginBtnText').innerText = t('立即登入 Google');
+      document.getElementById('modalCloseBtnText').innerText = t('稍後再說，先返回表單');
+    }
+
+    // ==========================================
+    // Auth 狀態綁定
+    // ==========================================
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
       if (user) {
-        // 已登入：更新頂部
-        topLoginBtn.classList.add('hidden');
-        topUserInfo.classList.remove('hidden');
-        topUserName.innerText = user.displayName || '訪客';
-        topUserEmail.innerText = user.email;
-        topUserAvatar.src = user.photoURL || 'https://via.placeholder.com/40';
+        document.getElementById('topLoginBtn').classList.add('hidden');
+        document.getElementById('topUserInfo').classList.remove('hidden');
+        document.getElementById('topUserName').innerText = user.displayName || '訪客';
+        document.getElementById('topUserEmail').innerText = user.email;
+        document.getElementById('topUserAvatar').src = user.photoURL || 'https://via.placeholder.com/40';
         
-        // 已登入：更新底部
-        bottomUnauth.classList.add('hidden');
-        bottomAuth.classList.remove('hidden');
-        bottomUserEmail.innerText = user.email;
-
-        // 如果 modal 開著就關掉它
+        document.getElementById('bottomUnauth').classList.add('hidden');
+        document.getElementById('bottomAuth').classList.remove('hidden');
+        document.getElementById('bottomUserEmail').innerText = user.email;
         closeModal();
       } else {
-        // 未登入：還原介面
-        topLoginBtn.classList.remove('hidden');
-        topUserInfo.classList.add('hidden');
-        bottomUnauth.classList.remove('hidden');
-        bottomAuth.classList.add('hidden');
+        document.getElementById('topLoginBtn').classList.remove('hidden');
+        document.getElementById('topUserInfo').classList.add('hidden');
+        document.getElementById('bottomUnauth').classList.remove('hidden');
+        document.getElementById('bottomAuth').classList.add('hidden');
       }
     });
 
-    // 觸發 Google 登入
     const handleLogin = async () => {
       try {
         await signInWithPopup(auth, provider);
       } catch (error) {
         console.error("登入錯誤:", error);
-        alert("登入失敗，請稍後再試！\n" + error.message);
+        alert(t('登入失敗，請稍後再試！') + "\n" + error.message);
       }
     };
 
-    // 觸發登出
-    const handleLogout = () => signOut(auth);
+    document.getElementById('topLoginBtn').addEventListener('click', handleLogin);
+    document.getElementById('bottomLoginBtn').addEventListener('click', handleLogin);
+    document.getElementById('modalLoginBtn').addEventListener('click', handleLogin);
+    document.getElementById('topLogoutBtn').addEventListener('click', () => signOut(auth));
 
-    // 綁定登入/登出按鈕事件
-    topLoginBtn.addEventListener('click', handleLogin);
-    bottomLoginBtn.addEventListener('click', handleLogin);
-    modalLoginBtn.addEventListener('click', handleLogin);
-    topLogoutBtn.addEventListener('click', handleLogout);
-
-    // Modal 控制
+    const loginModal = document.getElementById('loginModal');
+    const loginModalContent = document.getElementById('loginModalContent');
     const openModal = () => {
       loginModal.classList.remove('hidden');
       setTimeout(() => {
@@ -231,33 +283,50 @@
       loginModalContent.classList.add('scale-95');
       setTimeout(() => loginModal.classList.add('hidden'), 300);
     };
-    modalCloseBtn.addEventListener('click', closeModal);
+    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
 
     // ==========================================
-    // 表單初始載入與渲染 (動態)
+    // 載入與初始化 (設定, 題目, 字典)
     // ==========================================
     window.addEventListener('DOMContentLoaded', async () => {
       try {
-        const configSnap = await getDoc(doc(db, "form_app", "config"));
-        if (configSnap.exists()) {
-          const config = configSnap.data();
-          if (config.FORM_TITLE) document.getElementById('mainTitle').innerText = config.FORM_TITLE;
-          if (config.FORM_SUBTITLE) document.getElementById('subTitle').innerText = config.FORM_SUBTITLE;
-          if (config.SUCCESS_MSG) successMessageText = config.SUCCESS_MSG;
-          
-          if (config.IS_ACTIVE === false || config.IS_ACTIVE === 'FALSE') {
-            document.getElementById('loadingOverlay').innerHTML = `<p class="text-red-600 font-black text-2xl">表單目前尚未開放填寫 (Form is currently closed)</p>`;
-            return; 
+        const [configSnap, schemaSnap, i18nSnap] = await Promise.all([
+          getDoc(doc(db, "form_app", "config")),
+          getDoc(doc(db, "form_app", "schema")),
+          getDoc(doc(db, "form_app", "i18n"))
+        ]);
+
+        if (configSnap.exists()) configDataCache = configSnap.data();
+        if (schemaSnap.exists()) schemaQuestions = schemaSnap.data().questions || [];
+        
+        // 解析 I18N 字典檔
+        if (i18nSnap.exists()) {
+          const i18nData = i18nSnap.data();
+          if (i18nData.supported_languages) {
+            i18nData.supported_languages.forEach(lang => {
+               // 將 Firestore 來的語言加到預設的中文後面
+               if(lang.code !== 'zh-TW') supportedLangs.push(lang);
+            });
           }
+          // 解開所有以 dict_ 開頭的 JSON 字典字串
+          Object.keys(i18nData).forEach(key => {
+            if (key.startsWith('dict_')) {
+              const code = key.replace('dict_', '');
+              try { i18nDicts[code] = JSON.parse(i18nData[key]); } catch(e) {}
+            }
+          });
         }
 
-        const schemaSnap = await getDoc(doc(db, "form_app", "schema"));
-        if (schemaSnap.exists()) {
-          schemaQuestions = schemaSnap.data().questions || [];
-          renderDynamicForm(schemaQuestions);
-        } else {
-          throw new Error("無法取得題目配置");
+        // 檢查停用狀態
+        if (configDataCache.IS_ACTIVE === false || configDataCache.IS_ACTIVE === 'FALSE') {
+          document.getElementById('loadingOverlay').innerHTML = `<p class="text-red-600 font-black text-2xl">表單目前尚未開放填寫 (Form is currently closed)</p>`;
+          return; 
         }
+
+        // 開始渲染介面
+        renderLangSwitcher();
+        updateStaticUI();
+        renderDynamicForm(schemaQuestions);
 
         document.getElementById('loadingOverlay').classList.add('hidden');
         document.getElementById('safetyForm').classList.remove('hidden');
@@ -268,6 +337,9 @@
       }
     });
 
+    // ==========================================
+    // 動態表單渲染 (包含翻譯機制)
+    // ==========================================
     function renderDynamicForm(questions) {
       const container = document.getElementById('dynamicFields');
       container.innerHTML = '';
@@ -278,10 +350,11 @@
         const options = q.options ? q.options.split('|').map(o => o.trim()).filter(o => o) : [];
         let html = '';
 
+        // 加上翻譯轉換 t() 來顯示題目標題
         const sectionWrapperStart = `
           <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300">
             <h3 class="flex items-center text-lg md:text-xl font-black text-slate-800 mb-5">
-              <div class="w-1.5 h-6 bg-blue-600 rounded-full mr-3"></div>${q.label} ${reqMark}
+              <div class="w-1.5 h-6 bg-blue-600 rounded-full mr-3"></div>${t(q.label)} ${reqMark}
             </h3>`;
         const sectionWrapperEnd = `</div>`;
 
@@ -299,10 +372,11 @@
           const gridCols = options.length <= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'md:grid-cols-2';
           let optsHtml = options.map((opt, i) => `
             <div class="flex">
+              <!-- 注意：value 維持原始中文 opt 確保資料庫一致性，顯示的文字則用 t(opt) 翻譯 -->
               <input type="radio" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="card-selector hidden" ${isRequired && i === 0 ? 'required' : ''}>
               <label for="${q.id}_${i}" class="flex items-center w-full p-4 border-2 border-slate-200 bg-slate-50/50 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all">
                 <i class="fas fa-check-circle mr-3 text-slate-300 icon-box text-xl flex-shrink-0"></i>
-                <span class="text-sm md:text-base font-bold text-slate-700">${opt}</span>
+                <span class="text-sm md:text-base font-bold text-slate-700">${t(opt)}</span>
               </label>
             </div>
           `).join('');
@@ -313,7 +387,7 @@
             let optsHtml = options.map((opt, i) => `
               <label class="flex items-start p-5 md:p-6 bg-emerald-50/50 border-2 border-emerald-300 rounded-xl cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all group">
                 <input type="checkbox" name="${q.id}" value="${opt}" ${isRequired ? 'required' : ''} class="w-7 h-7 mt-0.5 mr-4 rounded text-emerald-600 focus:ring-emerald-500 border-emerald-400 flex-shrink-0 cursor-pointer">
-                <span class="text-base md:text-lg font-black text-emerald-900 leading-relaxed group-hover:text-emerald-700 transition-colors">${opt}</span>
+                <span class="text-base md:text-lg font-black text-emerald-900 leading-relaxed group-hover:text-emerald-700 transition-colors">${t(opt)}</span>
               </label>
             `).join('');
             html = sectionWrapperStart + `<div class="space-y-3">${optsHtml}</div>` + sectionWrapperEnd;
@@ -322,7 +396,7 @@
             let optsHtml = options.map((opt, i) => `
               <label class="flex items-center p-4 md:p-5 bg-amber-50/50 border-2 border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50 hover:border-amber-300 transition-all group">
                 <input type="checkbox" name="${q.id}" value="${opt}" ${isRequired ? 'required' : ''} class="w-6 h-6 mr-4 rounded text-amber-600 focus:ring-amber-500 border-amber-300 flex-shrink-0 cursor-pointer">
-                <span class="text-sm md:text-base font-bold text-amber-900 leading-tight group-hover:text-amber-700 transition-colors">${opt}</span>
+                <span class="text-sm md:text-base font-bold text-amber-900 leading-tight group-hover:text-amber-700 transition-colors">${t(opt)}</span>
               </label>
             `).join('');
             html = sectionWrapperStart + `<div class="grid grid-cols-1 gap-3">${optsHtml}</div>` + sectionWrapperEnd;
@@ -331,7 +405,7 @@
             let optsHtml = options.map((opt, i) => `
               <label class="flex items-center p-4 bg-slate-50/50 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all group">
                 <input type="checkbox" name="${q.id}" value="${opt}" ${isRequired ? 'required' : ''} class="w-6 h-6 mr-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 flex-shrink-0 cursor-pointer">
-                <span class="text-sm md:text-base font-bold text-slate-700 tracking-tight group-hover:text-blue-700 transition-colors">${opt}</span>
+                <span class="text-sm md:text-base font-bold text-slate-700 tracking-tight group-hover:text-blue-700 transition-colors">${t(opt)}</span>
               </label>
             `).join('');
             html = sectionWrapperStart + `<div class="grid grid-cols-1 gap-3">${optsHtml}</div>` + sectionWrapperEnd;
@@ -346,29 +420,25 @@
     }
 
     // ==========================================
-    // 提交邏輯 (包含驗證檢查)
+    // 提交邏輯
     // ==========================================
     const form = document.getElementById('safetyForm');
     const submitBtn = document.getElementById('submitBtn');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault(); 
-      
-      // [關鍵新增] 攔截：若未登入，禁止提交並彈出提示
       if (!currentUser) {
         openModal();
         return; 
       }
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>正在儲存中 (Saving)...';
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>' + t('正在儲存中 (Saving)...');
 
       const formData = new FormData(form);
-      
-      // 加入登入者資訊以備查
       const submissionData = { 
         createdAt: serverTimestamp(),
-        submitterEmail: currentUser.email, // 紀錄登入信箱
+        submitterEmail: currentUser.email,
       };
 
       schemaQuestions.forEach(q => {
@@ -381,17 +451,16 @@
 
       try {
         await addDoc(collection(db, "submissions"), submissionData);
-        
-        document.getElementById('successText').innerText = successMessageText;
         document.getElementById('formContainer').classList.add('hidden');
         document.getElementById('successMsg').classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (error) {
         console.error("寫入錯誤:", error);
-        alert("寫入失敗：" + error.message);
+        alert(t('寫入失敗：') + error.message);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '確認提交 (Confirm Submission)';
+        // 還原按鈕文字
+        document.getElementById('submitBtnText').innerText = t('確認提交 (Confirm Submission)');
       }
     });
 
