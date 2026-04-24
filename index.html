@@ -7,20 +7,48 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    .card-selector:checked + label { 
-      border-color: #1d4ed8; 
-      background-color: #eff6ff; 
-      box-shadow: 0 10px 15px -3px rgba(29, 78, 216, 0.2);
-    }
-    .card-selector:checked + label .icon-box { color: #1d4ed8; }
+    /* 輸入框焦點效果 */
     .input-focus-effect:focus {
       background-color: white;
       border-color: #1d4ed8;
       box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1);
     }
-    input[type="checkbox"] {
-      cursor: pointer;
+    
+    /* =========================================
+       高對比選取狀態 (High Contrast Selection)
+       ========================================= */
+    /* 隱藏原生輸入框，由 label 代理點擊 */
+    .custom-input { display: none; }
+
+    /* --- Radio & 一般 Checkbox (亮藍色主題) --- */
+    .custom-input:checked + .custom-label-blue {
+      border-color: #2563eb !important;     /* blue-600 */
+      background-color: #dbeafe !important; /* blue-100 高對比底色 */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
+    .custom-input:checked + .custom-label-blue .text-desc { color: #1e3a8a !important; } /* blue-900 文字 */
+    .custom-input:checked + .custom-label-blue .icon-unchecked { display: none !important; }
+    .custom-input:checked + .custom-label-blue .icon-checked { display: inline-block !important; }
+
+    /* --- 緊急應變 Checkbox (琥珀色主題) --- */
+    .custom-input:checked + .custom-label-amber {
+      border-color: #d97706 !important;     /* amber-600 */
+      background-color: #fef3c7 !important; /* amber-100 高對比底色 */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    }
+    .custom-input:checked + .custom-label-amber .text-desc { color: #78350f !important; } /* amber-900 文字 */
+    .custom-input:checked + .custom-label-amber .icon-unchecked { display: none !important; }
+    .custom-input:checked + .custom-label-amber .icon-checked { display: inline-block !important; }
+
+    /* --- 同意宣告 Checkbox (實心綠色主題) --- */
+    .custom-input:checked + .custom-label-emerald {
+      border-color: #059669 !important;     /* emerald-600 */
+      background-color: #059669 !important; /* emerald-600 實心底色 */
+      box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.4) !important;
+    }
+    .custom-input:checked + .custom-label-emerald .text-desc { color: #ffffff !important; } /* 純白文字 */
+    .custom-input:checked + .custom-label-emerald .icon-unchecked { display: none !important; }
+    .custom-input:checked + .custom-label-emerald .icon-checked { display: inline-block !important; }
   </style>
 </head>
 <body class="bg-slate-200 min-h-screen p-2 md:p-8 text-slate-800">
@@ -50,7 +78,6 @@
       <form id="safetyForm" class="bg-slate-50 p-4 md:p-10 rounded-b-2xl md:rounded-b-3xl shadow-2xl space-y-6 md:space-y-8 hidden">
         
         <!-- ================= 多語系切換區塊 ================= -->
-        <!-- 手機版採用 grid-cols-4，確保一排可以放下四個 -->
         <div id="langSwitcher" class="grid grid-cols-4 md:flex md:flex-wrap gap-1.5 md:gap-2 pb-2 md:pb-3 border-b-2 border-slate-200">
           <!-- 語言按鈕將由 JS 動態生成 -->
         </div>
@@ -172,7 +199,7 @@
     };
 
     // ==========================================
-    // 渲染語言切換按鈕 (手機版縮小字體)
+    // 渲染語言切換按鈕 (手機版網格排列)
     // ==========================================
     function renderLangSwitcher() {
       const container = document.getElementById('langSwitcher');
@@ -183,7 +210,6 @@
         btn.type = 'button';
         btn.innerText = lang.label;
         
-        // 針對手機板優化按鈕樣式，縮小 padding 與 font-size
         if (currentLang === lang.code) {
           btn.className = 'px-1 md:px-5 py-1.5 md:py-2 bg-blue-600 text-white font-bold rounded-md md:rounded-xl shadow-md transition-all text-[11px] md:text-sm flex items-center justify-center leading-tight tracking-tighter md:tracking-normal';
         } else {
@@ -329,7 +355,7 @@
     });
 
     // ==========================================
-    // 動態表單渲染 (針對手機優化比例)
+    // 動態表單渲染 (高亮卡片版)
     // ==========================================
     function renderDynamicForm(questions) {
       const container = document.getElementById('dynamicFields');
@@ -341,7 +367,6 @@
         const options = q.options ? q.options.split('|').map(o => o.trim()).filter(o => o) : [];
         let html = '';
 
-        // 卡片內距與標題字體隨裝置縮放
         const sectionWrapperStart = `
           <div class="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300">
             <h3 class="flex items-center text-base md:text-xl font-black text-slate-800 mb-3 md:mb-5">
@@ -363,10 +388,12 @@
           const gridCols = options.length <= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'md:grid-cols-2';
           let optsHtml = options.map((opt, i) => `
             <div class="flex">
-              <input type="radio" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="card-selector hidden" ${isRequired && i === 0 ? 'required' : ''}>
-              <label for="${q.id}_${i}" class="flex items-center w-full p-3 md:p-4 border-2 border-slate-200 bg-slate-50/50 rounded-lg md:rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all">
-                <i class="fas fa-check-circle mr-2 md:mr-3 text-slate-300 icon-box text-lg md:text-xl flex-shrink-0"></i>
-                <span class="text-xs md:text-base font-bold text-slate-700">${t(opt)}</span>
+              <input type="radio" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="custom-input" ${isRequired && i === 0 ? 'required' : ''}>
+              <!-- 使用 custom-label-blue 作為一般高亮主題 -->
+              <label for="${q.id}_${i}" class="custom-label-blue flex items-center w-full p-3 md:p-4 border-2 border-slate-200 bg-slate-50/80 rounded-lg md:rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all shadow-sm">
+                <i class="far fa-circle text-slate-300 icon-unchecked text-xl md:text-2xl mr-2 md:mr-3 flex-shrink-0"></i>
+                <i class="fas fa-dot-circle text-blue-600 icon-checked text-xl md:text-2xl mr-2 md:mr-3 flex-shrink-0" style="display: none;"></i>
+                <span class="text-xs md:text-base font-bold text-slate-700 text-desc">${t(opt)}</span>
               </label>
             </div>
           `).join('');
@@ -375,28 +402,43 @@
         else if (q.type === 'checkbox') {
           if (q.id === 'agreement') {
             let optsHtml = options.map((opt, i) => `
-              <label class="flex items-start p-4 md:p-6 bg-emerald-50/50 border-2 border-emerald-300 rounded-xl md:rounded-2xl cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all group">
-                <input type="checkbox" name="${q.id}" value="${opt}" ${isRequired ? 'required' : ''} class="w-5 h-5 md:w-7 md:h-7 mt-0.5 md:mt-0 mr-3 md:mr-4 rounded text-emerald-600 focus:ring-emerald-500 border-emerald-400 flex-shrink-0 cursor-pointer">
-                <span class="text-sm md:text-lg font-black text-emerald-900 leading-snug md:leading-relaxed group-hover:text-emerald-700 transition-colors">${t(opt)}</span>
-              </label>
+              <div class="flex">
+                <input type="checkbox" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="custom-input" ${isRequired ? 'required' : ''}>
+                <!-- 使用 custom-label-emerald 作為實心綠色主題 -->
+                <label for="${q.id}_${i}" class="custom-label-emerald flex items-start w-full p-4 md:p-6 bg-emerald-50/50 border-2 border-emerald-300 rounded-xl md:rounded-2xl cursor-pointer hover:bg-emerald-100 hover:border-emerald-400 transition-all shadow-sm">
+                  <i class="far fa-square text-emerald-400 icon-unchecked text-xl md:text-2xl mr-3 md:mr-4 mt-0.5 flex-shrink-0"></i>
+                  <i class="fas fa-check-square text-white icon-checked text-xl md:text-2xl mr-3 md:mr-4 mt-0.5 flex-shrink-0" style="display: none;"></i>
+                  <span class="text-sm md:text-lg font-black text-emerald-900 leading-snug md:leading-relaxed transition-colors text-desc">${t(opt)}</span>
+                </label>
+              </div>
             `).join('');
             html = sectionWrapperStart + `<div class="space-y-2 md:space-y-3">${optsHtml}</div>` + sectionWrapperEnd;
           } 
           else if (q.id === 'emergency_info') {
             let optsHtml = options.map((opt, i) => `
-              <label class="flex items-center p-3 md:p-5 bg-amber-50/50 border-2 border-amber-200 rounded-lg md:rounded-xl cursor-pointer hover:bg-amber-50 hover:border-amber-300 transition-all group">
-                <input type="checkbox" name="${q.id}" value="${opt}" ${isRequired ? 'required' : ''} class="w-5 h-5 md:w-6 md:h-6 mr-3 md:mr-4 rounded text-amber-600 focus:ring-amber-500 border-amber-300 flex-shrink-0 cursor-pointer">
-                <span class="text-xs md:text-base font-bold text-amber-900 leading-tight group-hover:text-amber-700 transition-colors">${t(opt)}</span>
-              </label>
+              <div class="flex">
+                <input type="checkbox" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="custom-input" ${isRequired ? 'required' : ''}>
+                <!-- 使用 custom-label-amber 作為琥珀色主題 -->
+                <label for="${q.id}_${i}" class="custom-label-amber flex items-center w-full p-3 md:p-5 bg-amber-50/50 border-2 border-amber-200 rounded-lg md:rounded-xl cursor-pointer hover:bg-amber-100 hover:border-amber-300 transition-all shadow-sm">
+                  <i class="far fa-square text-amber-300 icon-unchecked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0"></i>
+                  <i class="fas fa-check-square text-amber-600 icon-checked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0" style="display: none;"></i>
+                  <span class="text-xs md:text-base font-bold text-amber-900 leading-tight transition-colors text-desc">${t(opt)}</span>
+                </label>
+              </div>
             `).join('');
             html = sectionWrapperStart + `<div class="grid grid-cols-1 gap-2 md:gap-3">${optsHtml}</div>` + sectionWrapperEnd;
           } 
           else {
             let optsHtml = options.map((opt, i) => `
-              <label class="flex items-center p-3 md:p-4 bg-slate-50/50 border-2 border-slate-200 rounded-lg md:rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all group">
-                <input type="checkbox" name="${q.id}" value="${opt}" ${isRequired ? 'required' : ''} class="w-5 h-5 md:w-6 md:h-6 mr-3 md:mr-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 flex-shrink-0 cursor-pointer">
-                <span class="text-xs md:text-base font-bold text-slate-700 tracking-tight group-hover:text-blue-700 transition-colors leading-snug">${t(opt)}</span>
-              </label>
+              <div class="flex">
+                <input type="checkbox" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="custom-input" ${isRequired ? 'required' : ''}>
+                <!-- 一般安全行為使用 custom-label-blue 主題 -->
+                <label for="${q.id}_${i}" class="custom-label-blue flex items-center w-full p-3 md:p-4 bg-slate-50/50 border-2 border-slate-200 rounded-lg md:rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50/80 transition-all shadow-sm">
+                  <i class="far fa-square text-slate-300 icon-unchecked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0"></i>
+                  <i class="fas fa-check-square text-blue-600 icon-checked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0" style="display: none;"></i>
+                  <span class="text-xs md:text-base font-bold text-slate-700 tracking-tight transition-colors text-desc leading-snug">${t(opt)}</span>
+                </label>
+              </div>
             `).join('');
             html = sectionWrapperStart + `<div class="grid grid-cols-1 gap-2 md:gap-3">${optsHtml}</div>` + sectionWrapperEnd;
           }
@@ -410,12 +452,12 @@
     }
 
     // ==========================================
-    // 提交邏輯
+    // 提交邏輯 (包含 XSS 防護消毒)
     // ==========================================
     const form = document.getElementById('safetyForm');
     const submitBtn = document.getElementById('submitBtn');
 
-    // [新增] 基礎 XSS 防護：將特殊符號轉換為純文字實體
+    // XSS 防護：將特殊符號轉換為純文字實體
     const sanitizeInput = (str) => {
       if (typeof str !== 'string') return str;
       return str.replace(/[&<>"']/g, (m) => {
@@ -440,7 +482,7 @@
         submitterEmail: currentUser.email,
       };
 
-      // [修改] 寫入資料庫前，全面經過 sanitizeInput 消毒
+      // 擷取資料並進行 XSS 消毒
       schemaQuestions.forEach(q => {
         if (q.type === 'checkbox') {
           submissionData[q.id] = sanitizeInput(formData.getAll(q.id).join(", "));
