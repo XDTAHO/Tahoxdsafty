@@ -17,8 +17,18 @@
     /* =========================================
        高對比選取狀態 (High Contrast Selection)
        ========================================= */
-    /* 隱藏原生輸入框，由 label 代理點擊 */
-    .custom-input { display: none; }
+    /* 隱藏原生輸入框，由 label 代理點擊。改用 sr-only 寫法解決必填驗證失效問題 */
+    .custom-input { 
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
 
     /* --- Radio & 一般 Checkbox (亮藍色主題) --- */
     .custom-input:checked + .custom-label-blue {
@@ -227,232 +237,7 @@
     }
 
     // ==========================================
-    // 更新靜態文字 UI
-    // ==========================================
-    function updateStaticUI() {
-      document.getElementById('mainTitle').innerText = t(configDataCache.FORM_TITLE || '訪客風險危害告知');
-      document.getElementById('subTitle').innerText = t(configDataCache.FORM_SUBTITLE || 'Visitor Safety and Hazard Notification');
-      document.getElementById('successText').innerText = t(configDataCache.SUCCESS_MSG || 'Submission Successful');
-
-      document.getElementById('authTitleText').innerText = t('身分驗證');
-      document.getElementById('authDesc').innerText = t('提交表單前需驗證 Google 帳號 (可先填寫下方資料)');
-      document.getElementById('topLoginBtnText').innerText = t('登入 Google');
-      document.getElementById('topLogoutBtn').innerText = t('登出');
-      document.getElementById('bottomUnauthText').innerText = t('尚未登入，將無法提交表單');
-      document.getElementById('bottomLoginBtnText').innerText = t('登入');
-      document.getElementById('bottomAuthText1').innerText = t('已使用');
-      document.getElementById('bottomAuthText2').innerText = t('登入');
-      document.getElementById('submitBtnText').innerText = t('確認提交 (Confirm Submission)');
-      
-      document.getElementById('successTitle').innerText = t('提交成功！');
-      document.getElementById('resetBtnText').innerText = t('填寫下一份 (Fill another)');
-      document.getElementById('modalTitle').innerText = t('需要登入以驗證身分');
-      document.getElementById('modalDesc1').innerText = t('請先登入您的 Google 帳號才能提交表單。');
-      document.getElementById('modalDesc2').innerText = t('別擔心，您剛剛填寫的資料皆已保留。');
-      document.getElementById('modalLoginBtnText').innerText = t('立即登入 Google');
-      document.getElementById('modalCloseBtnText').innerText = t('稍後再說，先返回表單');
-    }
-
-    // ==========================================
-    // Auth 狀態綁定
-    // ==========================================
-    onAuthStateChanged(auth, (user) => {
-      currentUser = user;
-      if (user) {
-        document.getElementById('topLoginBtn').classList.add('hidden');
-        document.getElementById('topUserInfo').classList.remove('hidden');
-        document.getElementById('topUserName').innerText = user.displayName || '訪客';
-        document.getElementById('topUserEmail').innerText = user.email;
-        document.getElementById('topUserAvatar').src = user.photoURL || 'https://via.placeholder.com/40';
-        
-        document.getElementById('bottomUnauth').classList.add('hidden');
-        document.getElementById('bottomAuth').classList.remove('hidden');
-        document.getElementById('bottomUserEmail').innerText = user.email;
-        closeModal();
-      } else {
-        document.getElementById('topLoginBtn').classList.remove('hidden');
-        document.getElementById('topUserInfo').classList.add('hidden');
-        document.getElementById('bottomUnauth').classList.remove('hidden');
-        document.getElementById('bottomAuth').classList.add('hidden');
-      }
-    });
-
-    const handleLogin = async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (error) {
-        console.error("登入錯誤:", error);
-        alert(t('登入失敗，請稍後再試！') + "\n" + error.message);
-      }
-    };
-
-    document.getElementById('topLoginBtn').addEventListener('click', handleLogin);
-    document.getElementById('bottomLoginBtn').addEventListener('click', handleLogin);
-    document.getElementById('modalLoginBtn').addEventListener('click', handleLogin);
-    document.getElementById('topLogoutBtn').addEventListener('click', () => signOut(auth));
-
-    const loginModal = document.getElementById('loginModal');
-    const loginModalContent = document.getElementById('loginModalContent');
-    const openModal = () => {
-      loginModal.classList.remove('hidden');
-      setTimeout(() => {
-        loginModal.classList.remove('opacity-0');
-        loginModalContent.classList.remove('scale-95');
-      }, 10);
-    };
-    const closeModal = () => {
-      loginModal.classList.add('opacity-0');
-      loginModalContent.classList.add('scale-95');
-      setTimeout(() => loginModal.classList.add('hidden'), 300);
-    };
-    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-
-    // ==========================================
-    // 載入與初始化
-    // ==========================================
-    window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const [configSnap, schemaSnap, i18nSnap] = await Promise.all([
-          getDoc(doc(db, "form_app", "config")),
-          getDoc(doc(db, "form_app", "schema")),
-          getDoc(doc(db, "form_app", "i18n"))
-        ]);
-
-        if (configSnap.exists()) configDataCache = configSnap.data();
-        if (schemaSnap.exists()) schemaQuestions = schemaSnap.data().questions || [];
-        
-        if (i18nSnap.exists()) {
-          const i18nData = i18nSnap.data();
-          if (i18nData.supported_languages) {
-            i18nData.supported_languages.forEach(lang => {
-               if(lang.code !== 'zh-TW') supportedLangs.push(lang);
-            });
-          }
-          Object.keys(i18nData).forEach(key => {
-            if (key.startsWith('dict_')) {
-              const code = key.replace('dict_', '');
-              try { i18nDicts[code] = JSON.parse(i18nData[key]); } catch(e) {}
-            }
-          });
-        }
-
-        if (configDataCache.IS_ACTIVE === false || configDataCache.IS_ACTIVE === 'FALSE') {
-          document.getElementById('loadingOverlay').innerHTML = `<p class="text-red-600 font-black text-xl md:text-2xl">表單目前尚未開放填寫 (Form is currently closed)</p>`;
-          return; 
-        }
-
-        renderLangSwitcher();
-        updateStaticUI();
-        renderDynamicForm(schemaQuestions);
-
-        document.getElementById('loadingOverlay').classList.add('hidden');
-        document.getElementById('safetyForm').classList.remove('hidden');
-
-      } catch (error) {
-        console.error("初始化錯誤:", error);
-        document.getElementById('loadingOverlay').innerHTML = `<p class="text-red-600 font-bold text-lg md:text-xl">載入失敗：請聯絡管理員確認 Firebase 設定。</p>`;
-      }
-    });
-
-    // ==========================================
-    // 動態表單渲染 (高亮卡片版)
-    // ==========================================
-    function renderDynamicForm(questions) {
-      const container = document.getElementById('dynamicFields');
-      container.innerHTML = '';
-      
-      questions.forEach(q => {
-        const isRequired = q.required === true || String(q.required).toUpperCase() === 'TRUE';
-        const reqMark = isRequired ? '<span class="text-red-500 ml-1 text-lg md:text-xl">*</span>' : '';
-        const options = q.options ? q.options.split('|').map(o => o.trim()).filter(o => o) : [];
-        let html = '';
-
-        const sectionWrapperStart = `
-          <div class="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300">
-            <h3 class="flex items-center text-base md:text-xl font-black text-slate-800 mb-3 md:mb-5">
-              <div class="w-1.5 h-5 md:h-6 bg-blue-600 rounded-full mr-2 md:mr-3"></div>${t(q.label)} ${reqMark}
-            </h3>`;
-        const sectionWrapperEnd = `</div>`;
-
-        if (q.type === 'text') {
-          html = sectionWrapperStart + `
-            <input type="text" name="${q.id}" ${isRequired ? 'required' : ''} class="input-focus-effect w-full bg-slate-50 border-2 border-slate-200 text-slate-800 rounded-lg md:rounded-xl p-3 md:p-4 outline-none font-bold transition-all text-sm md:text-lg">
-          ` + sectionWrapperEnd;
-        } 
-        else if (q.type === 'date') {
-          html = sectionWrapperStart + `
-            <input type="date" name="${q.id}" ${isRequired ? 'required' : ''} class="w-full md:w-64 input-focus-effect bg-slate-50 border-2 border-slate-200 text-slate-800 rounded-lg md:rounded-xl p-3 md:p-4 outline-none font-bold transition-all date-auto-fill text-sm md:text-lg">
-          ` + sectionWrapperEnd;
-        } 
-        else if (q.type === 'radio') {
-          const gridCols = options.length <= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'md:grid-cols-2';
-          let optsHtml = options.map((opt, i) => `
-            <div class="flex">
-              <input type="radio" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="custom-input" ${isRequired && i === 0 ? 'required' : ''}>
-              <!-- 使用 custom-label-blue 作為一般高亮主題 -->
-              <label for="${q.id}_${i}" class="custom-label-blue flex items-center w-full p-3 md:p-4 border-2 border-slate-200 bg-slate-50/80 rounded-lg md:rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all shadow-sm">
-                <i class="far fa-circle text-slate-300 icon-unchecked text-xl md:text-2xl mr-2 md:mr-3 flex-shrink-0"></i>
-                <i class="fas fa-dot-circle text-blue-600 icon-checked text-xl md:text-2xl mr-2 md:mr-3 flex-shrink-0" style="display: none;"></i>
-                <span class="text-xs md:text-base font-bold text-slate-700 text-desc">${t(opt)}</span>
-              </label>
-            </div>
-          `).join('');
-          html = sectionWrapperStart + `<div class="grid grid-cols-1 ${gridCols} gap-2 md:gap-3">${optsHtml}</div>` + sectionWrapperEnd;
-        } 
-        else if (q.type === 'checkbox') {
-          if (q.id === 'agreement') {
-            let optsHtml = options.map((opt, i) => `
-              <div class="flex">
-                <input type="checkbox" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="custom-input" ${isRequired ? 'required' : ''}>
-                <!-- 使用 custom-label-emerald 作為實心綠色主題 -->
-                <label for="${q.id}_${i}" class="custom-label-emerald flex items-start w-full p-4 md:p-6 bg-emerald-50/50 border-2 border-emerald-300 rounded-xl md:rounded-2xl cursor-pointer hover:bg-emerald-100 hover:border-emerald-400 transition-all shadow-sm">
-                  <i class="far fa-square text-emerald-400 icon-unchecked text-xl md:text-2xl mr-3 md:mr-4 mt-0.5 flex-shrink-0"></i>
-                  <i class="fas fa-check-square text-white icon-checked text-xl md:text-2xl mr-3 md:mr-4 mt-0.5 flex-shrink-0" style="display: none;"></i>
-                  <span class="text-sm md:text-lg font-black text-emerald-900 leading-snug md:leading-relaxed transition-colors text-desc">${t(opt)}</span>
-                </label>
-              </div>
-            `).join('');
-            html = sectionWrapperStart + `<div class="space-y-2 md:space-y-3">${optsHtml}</div>` + sectionWrapperEnd;
-          } 
-          else if (q.id === 'emergency_info') {
-            let optsHtml = options.map((opt, i) => `
-              <div class="flex">
-                <input type="checkbox" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="custom-input" ${isRequired ? 'required' : ''}>
-                <!-- 使用 custom-label-amber 作為琥珀色主題 -->
-                <label for="${q.id}_${i}" class="custom-label-amber flex items-center w-full p-3 md:p-5 bg-amber-50/50 border-2 border-amber-200 rounded-lg md:rounded-xl cursor-pointer hover:bg-amber-100 hover:border-amber-300 transition-all shadow-sm">
-                  <i class="far fa-square text-amber-300 icon-unchecked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0"></i>
-                  <i class="fas fa-check-square text-amber-600 icon-checked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0" style="display: none;"></i>
-                  <span class="text-xs md:text-base font-bold text-amber-900 leading-tight transition-colors text-desc">${t(opt)}</span>
-                </label>
-              </div>
-            `).join('');
-            html = sectionWrapperStart + `<div class="grid grid-cols-1 gap-2 md:gap-3">${optsHtml}</div>` + sectionWrapperEnd;
-          } 
-          else {
-            let optsHtml = options.map((opt, i) => `
-              <div class="flex">
-                <input type="checkbox" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="custom-input" ${isRequired ? 'required' : ''}>
-                <!-- 一般安全行為使用 custom-label-blue 主題 -->
-                <label for="${q.id}_${i}" class="custom-label-blue flex items-center w-full p-3 md:p-4 bg-slate-50/50 border-2 border-slate-200 rounded-lg md:rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50/80 transition-all shadow-sm">
-                  <i class="far fa-square text-slate-300 icon-unchecked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0"></i>
-                  <i class="fas fa-check-square text-blue-600 icon-checked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0" style="display: none;"></i>
-                  <span class="text-xs md:text-base font-bold text-slate-700 tracking-tight transition-colors text-desc leading-snug">${t(opt)}</span>
-                </label>
-              </div>
-            `).join('');
-            html = sectionWrapperStart + `<div class="grid grid-cols-1 gap-2 md:gap-3">${optsHtml}</div>` + sectionWrapperEnd;
-          }
-        }
-        container.insertAdjacentHTML('beforeend', html);
-      });
-
-      document.querySelectorAll('.date-auto-fill').forEach(el => {
-        el.value = new Date().toISOString().split('T')[0];
-      });
-    }
-
-    // ==========================================
-    // 提交邏輯 (包含 XSS 防護消毒)
+    // 提交邏輯 (包含 XSS 防護消毒與必填攔截)
     // ==========================================
     const form = document.getElementById('safetyForm');
     const submitBtn = document.getElementById('submitBtn');
@@ -465,6 +250,30 @@
         return map[m];
       });
     };
+
+    // [新增] 必填欄位驗證攔截器與視覺回饋
+    submitBtn.addEventListener('click', (e) => {
+      // 檢查表單是否通過原生 required 驗證
+      if (!form.checkValidity()) {
+        e.preventDefault(); // 阻止表單靜默失敗
+        
+        alert(t('您尚有必填欄位未完成，請檢查帶有 * 記號的項目！'));
+        
+        // 找出第一個漏填的輸入框
+        const firstInvalid = form.querySelector(':invalid');
+        if (firstInvalid) {
+          // 找到包含該輸入框的卡片區塊
+          const card = firstInvalid.closest('.bg-white') || firstInvalid.closest('.bg-slate-50') || firstInvalid.parentElement;
+          
+          // 平滑滾動到該卡片位置
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // 加入紅框閃爍動畫提示使用者
+          card.classList.add('ring-4', 'ring-red-400', 'transition-all', 'duration-300');
+          setTimeout(() => card.classList.remove('ring-4', 'ring-red-400'), 2500);
+        }
+      }
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault(); 
