@@ -1,4 +1,38 @@
-<!-- ... existing code ... -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訪客風險危害告知系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .card-selector:checked + label { 
+      border-color: #1d4ed8; 
+      background-color: #eff6ff; 
+      box-shadow: 0 10px 15px -3px rgba(29, 78, 216, 0.2);
+    }
+    .card-selector:checked + label .icon-box { color: #1d4ed8; }
+    .input-focus-effect:focus {
+      background-color: white;
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-slate-200 min-h-screen p-4 md:p-8 text-slate-800">
+
+  <div class="max-w-4xl mx-auto">
+    <!-- 這個 formContainer 是切換畫面的關鍵，不可遺漏 -->
+    <div id="formContainer">
+      <div class="bg-white rounded-t-3xl border-b-8 border-blue-800 shadow-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-800 to-blue-600 p-8 md:p-10 text-white text-center">
+          <div class="flex items-center justify-center space-x-3 mb-4">
+            <i class="fas fa-user-shield text-4xl"></i>
+            <h1 class="text-3xl md:text-4xl font-black tracking-tight">訪客風險危害告知</h1>
+          </div>
+          <h2 class="text-xl font-bold mb-4 opacity-90 uppercase tracking-widest">Visitor Safety and Hazard Notification</h2>
+          
           <div class="h-px w-full bg-blue-400 opacity-30 my-4"></div>
           
           <p class="text-blue-50 text-sm md:text-base font-medium leading-relaxed max-w-2xl mx-auto">
@@ -8,7 +42,6 @@
         </div>
       </div>
 
-      <!-- 移除了原本的 onsubmit 屬性，改由 JavaScript 監聽 -->
       <form id="safetyForm" class="bg-white p-6 md:p-12 rounded-b-3xl shadow-2xl space-y-10">
         
         <section class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border-2 border-slate-200 shadow-sm">
@@ -27,19 +60,17 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <input type="radio" name="role" id="role1" value="訪客 (Visitor) General" class="card-selector hidden" required>
             <label for="role1" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
-<!-- ... existing code ... -->
+              <i class="fas fa-user-tag text-2xl mb-2 text-slate-400 icon-box"></i>
               <span class="text-xs font-bold text-slate-700">訪客 (Visitor)</span>
             </label>
             <input type="radio" name="role" id="role2" value="新進人員 (New Employee HQ)" class="card-selector hidden">
             <label for="role2" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
               <i class="fas fa-building text-2xl mb-2 text-slate-400 icon-box"></i>
-<!-- ... existing code ... -->
               <span class="text-xs font-bold text-slate-700">新進人員 (HQ)</span>
             </label>
             <input type="radio" name="role" id="role3" value="新進人員(New Employee Site)" class="card-selector hidden">
             <label for="role3" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
               <i class="fas fa-helmet-safety text-2xl mb-2 text-slate-400 icon-box"></i>
-<!-- ... existing code ... -->
               <span class="text-xs font-bold text-slate-700">新進人員 (Site)</span>
             </label>
             <input type="radio" name="role" id="role4" value="承攬商 (Contractor)" class="card-selector hidden">
@@ -106,23 +137,25 @@
       </form>
     </div>
 
+    <!-- 送出成功後的畫面 -->
     <div id="successMsg" class="hidden bg-white p-20 rounded-3xl shadow-2xl text-center space-y-6">
-<!-- ... existing code ... -->
+      <div class="w-32 h-32 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-6xl text-emerald-600">
+        <i class="fas fa-check-double"></i>
+      </div>
       <h2 class="text-4xl font-black text-slate-800">提交成功！</h2>
       <p class="text-slate-500 font-bold uppercase tracking-wide">Submission Successful</p>
-      <!-- 改寫了按鈕的 onClick 事件綁定 -->
       <button id="resetBtn" class="bg-blue-800 hover:bg-blue-900 text-white font-black py-4 px-12 rounded-2xl shadow-lg transition-all active:scale-95">
         填寫下一份 (Fill another)
       </button>
     </div>
   </div>
 
-  <!-- 替換掉原本依賴 google.script.run 的邏輯，改用 Firebase JS SDK (ES Module) -->
   <script type="module">
+    // 引入 Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // 您剛才取得的 Firebase 專案設定
+    // 您的 Firebase 專案設定
     const firebaseConfig = {
       apiKey: "AIzaSyDwAD3O6uNDWQoNITdeOEc4LqfLKC_IZRQ",
       authDomain: "tahoxdsafty.firebaseapp.com",
@@ -150,7 +183,7 @@
 
     // 監聽表單送出事件
     form.addEventListener('submit', async (e) => {
-      e.preventDefault(); // 阻擋預設重新整理
+      e.preventDefault(); // 阻擋預設重整行為
       
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>正在儲存中 (Saving)...';
@@ -158,22 +191,21 @@
       // 擷取表單所有資料
       const formData = new FormData(form);
       
-      // 整理為與 GAS Schema 匹配的物件結構
+      // 整理為物件結構
       const submissionData = {
         name: formData.get('name'),
-        company: formData.get('company') || "", // 確保非必填欄位為空時不報錯
+        company: formData.get('company') || "",
         role: formData.get('role'),
         visit_date: formData.get('visit_date'),
         risk_awareness: formData.get('risk_awareness'),
-        // Checkbox 多選項會被合併成字串，以符合 Sheet 格式
         safety_rules: formData.getAll('safety_rules').join(", "),
         emergency_info: formData.getAll('emergency_info').join(", "),
         agreement: formData.get('agreement'),
-        createdAt: serverTimestamp() // Firestore 的伺服器建立時間
+        createdAt: serverTimestamp() // Firestore 時間戳記
       };
 
       try {
-        // 直接將資料推送到 Firestore 的 'submissions' 集合中
+        // 直接推送到 Firestore
         await addDoc(collection(db, "submissions"), submissionData);
         
         // 成功後隱藏表單，顯示成功畫面
