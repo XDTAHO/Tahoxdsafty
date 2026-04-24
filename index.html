@@ -415,6 +415,15 @@
     const form = document.getElementById('safetyForm');
     const submitBtn = document.getElementById('submitBtn');
 
+    // [新增] 基礎 XSS 防護：將特殊符號轉換為純文字實體
+    const sanitizeInput = (str) => {
+      if (typeof str !== 'string') return str;
+      return str.replace(/[&<>"']/g, (m) => {
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        return map[m];
+      });
+    };
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault(); 
       if (!currentUser) {
@@ -431,11 +440,12 @@
         submitterEmail: currentUser.email,
       };
 
+      // [修改] 寫入資料庫前，全面經過 sanitizeInput 消毒
       schemaQuestions.forEach(q => {
         if (q.type === 'checkbox') {
-          submissionData[q.id] = formData.getAll(q.id).join(", ");
+          submissionData[q.id] = sanitizeInput(formData.getAll(q.id).join(", "));
         } else {
-          submissionData[q.id] = formData.get(q.id) || "";
+          submissionData[q.id] = sanitizeInput(formData.get(q.id) || "");
         }
       });
 
