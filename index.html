@@ -18,144 +18,66 @@
       border-color: #1d4ed8;
       box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1);
     }
+    /* 新增：自訂核取方塊與滑鼠指標樣式 */
+    input[type="checkbox"] {
+      cursor: pointer;
+    }
   </style>
 </head>
 <body class="bg-slate-200 min-h-screen p-4 md:p-8 text-slate-800">
 
   <div class="max-w-4xl mx-auto">
-    <!-- 這個 formContainer 是切換畫面的關鍵，不可遺漏 -->
+    <!-- 整個表單的容器 -->
     <div id="formContainer">
+      
+      <!-- 表單頭部 (標題將由 Firebase 動態載入) -->
       <div class="bg-white rounded-t-3xl border-b-8 border-blue-800 shadow-2xl overflow-hidden">
         <div class="bg-gradient-to-r from-blue-800 to-blue-600 p-8 md:p-10 text-white text-center">
           <div class="flex items-center justify-center space-x-3 mb-4">
             <i class="fas fa-user-shield text-4xl"></i>
-            <h1 class="text-3xl md:text-4xl font-black tracking-tight">訪客風險危害告知</h1>
+            <h1 id="mainTitle" class="text-3xl md:text-4xl font-black tracking-tight">載入中...</h1>
           </div>
-          <h2 class="text-xl font-bold mb-4 opacity-90 uppercase tracking-widest">Visitor Safety and Hazard Notification</h2>
-          
-          <div class="h-px w-full bg-blue-400 opacity-30 my-4"></div>
-          
-          <p class="text-blue-50 text-sm md:text-base font-medium leading-relaxed max-w-2xl mx-auto">
-            Please read and acknowledge the potential risks and safety guidelines before entering the premises.<br>
-            <span class="font-bold">(進入本場所前，請務必閱讀並確認潛在風險與安全指南。)</span>
-          </p>
+          <h2 id="subTitle" class="text-xl font-bold opacity-90 uppercase tracking-widest">Loading...</h2>
         </div>
       </div>
 
-      <form id="safetyForm" class="bg-white p-6 md:p-12 rounded-b-3xl shadow-2xl space-y-10">
+      <!-- 載入中動畫 -->
+      <div id="loadingOverlay" class="bg-white p-20 rounded-b-3xl shadow-2xl flex flex-col items-center justify-center space-y-6">
+        <i class="fas fa-spinner fa-spin text-6xl text-blue-800"></i>
+        <p class="text-blue-800 font-bold text-xl tracking-widest">正在從雲端載入表單配置...</p>
+      </div>
+
+      <!-- 表單本體 (初始隱藏，待資料載入後顯示) -->
+      <form id="safetyForm" class="bg-slate-50 p-6 md:p-10 rounded-b-3xl shadow-2xl space-y-8 hidden">
         
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border-2 border-slate-200 shadow-sm">
-          <div class="space-y-2">
-            <label class="block text-blue-900 font-black text-sm">1. 真實姓名 (Name) *</label>
-            <input type="text" name="name" required class="input-focus-effect w-full border-2 border-slate-300 rounded-xl p-4 outline-none">
-          </div>
-          <div class="space-y-2">
-            <label class="block text-blue-900 font-black text-sm">2. 公司 / Company</label>
-            <input type="text" name="company" class="input-focus-effect w-full border-2 border-slate-300 rounded-xl p-4 outline-none">
-          </div>
-        </section>
-
-        <section class="space-y-4">
-          <label class="block text-slate-800 font-black text-lg border-l-8 border-blue-700 pl-4">3. 您的身份 / Role *</label>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <input type="radio" name="role" id="role1" value="訪客 (Visitor) General" class="card-selector hidden" required>
-            <label for="role1" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
-              <i class="fas fa-user-tag text-2xl mb-2 text-slate-400 icon-box"></i>
-              <span class="text-xs font-bold text-slate-700">訪客 (Visitor)</span>
-            </label>
-            <input type="radio" name="role" id="role2" value="新進人員 (New Employee HQ)" class="card-selector hidden">
-            <label for="role2" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
-              <i class="fas fa-building text-2xl mb-2 text-slate-400 icon-box"></i>
-              <span class="text-xs font-bold text-slate-700">新進人員 (HQ)</span>
-            </label>
-            <input type="radio" name="role" id="role3" value="新進人員(New Employee Site)" class="card-selector hidden">
-            <label for="role3" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
-              <i class="fas fa-helmet-safety text-2xl mb-2 text-slate-400 icon-box"></i>
-              <span class="text-xs font-bold text-slate-700">新進人員 (Site)</span>
-            </label>
-            <input type="radio" name="role" id="role4" value="承攬商 (Contractor)" class="card-selector hidden">
-            <label for="role4" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
-              <i class="fas fa-hard-hat text-2xl mb-2 text-slate-400 icon-box"></i>
-              <span class="text-xs font-bold text-slate-700">承攬商 (Contractor)</span>
-            </label>
-          </div>
-        </section>
-
-        <section class="p-6 bg-slate-50 rounded-2xl border-2 border-slate-200">
-          <label class="block text-slate-800 font-black text-sm mb-3">4. 日期 (Date)</label>
-          <input type="date" name="visit_date" id="todayDate" class="w-full md:w-64 border-2 border-slate-300 rounded-xl p-4 bg-white font-bold outline-none">
-        </section>
-
-        <section class="space-y-4">
-          <label class="block text-slate-800 font-black text-lg border-l-8 border-blue-700 pl-4">5. 主要風險危害區域告知 *</label>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div class="flex"><input type="radio" name="risk_awareness" id="risk1" value="威立雅安全政策 (Veolia Safety Policy)" class="card-selector hidden" required><label for="risk1" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-file-shield mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">威立雅安全政策 (Veolia Safety Policy)</span></label></div>
-            <div class="flex"><input type="radio" name="risk_awareness" id="risk2" value="威立雅十大求生規則 (12 LSR & HRMS)" class="card-selector hidden"><label for="risk2" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-clipboard-list mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">威立雅十大求生規則 (12 LSR & HRMS)</span></label></div>
-            <div class="flex"><input type="radio" name="risk_awareness" id="risk3" value="車輛/堆高機作業區域 (Vehicle/Forklift Operation Areas)" class="card-selector hidden"><label for="risk3" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-truck-moving mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">車輛/堆高機作業區域 (Vehicle/Forklift)</span></label></div>
-            <div class="flex"><input type="radio" name="risk_awareness" id="risk4" value="高溫/高壓區域 (High Temperature/High Pressure Areas)" class="card-selector hidden"><label for="risk4" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-temperature-high mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">高溫/高壓區域 (High Temperature/Pressure)</span></label></div>
-            <div class="flex"><input type="radio" name="risk_awareness" id="risk5" value="高處作業/墜落風險區 (Work at Height/Fall Risk Areas)" class="card-selector hidden"><label for="risk5" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-mountain mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">高處作業/墜落風險區 (Work at Height)</span></label></div>
-            <div class="flex"><input type="radio" name="risk_awareness" id="risk6" value="感電危險區 (Electrical Hazard Zones)" class="card-selector hidden"><label for="risk6" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-bolt mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">感電危險區 (Electrical Hazard Zones)</span></label></div>
-            <div class="flex"><input type="radio" name="risk_awareness" id="risk7" value="化學品儲存/使用區 (Chemical Storage/Usage Areas)" class="card-selector hidden"><label for="risk7" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-flask mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">化學品儲存/使用區 (Chemical Storage)</span></label></div>
-            <div class="flex"><input type="radio" name="risk_awareness" id="risk8" value="噪音區域 (Noise Areas)" class="card-selector hidden"><label for="risk8" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-ear-deaf mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">噪音區域 (Noise Areas)</span></label></div>
-          </div>
-        </section>
-
-        <section class="bg-blue-50 p-6 md:p-8 rounded-3xl border-2 border-blue-200 shadow-inner space-y-4">
-          <p class="font-black text-blue-900 flex items-center"><i class="fas fa-check-double mr-2"></i>6. 安全行為準則 (請全數勾選)</p>
-          <div class="grid grid-cols-1 gap-3">
-            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="safety_rules" value="配戴必要的個人防護裝備 (PPE)" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">配戴必要的個人防護裝備 (PPE)</span></label>
-            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="safety_rules" value="遵守所有安全標誌與警告" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">遵守所有安全標誌與警告</span></label>
-            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="safety_rules" value="不隨意動火或吸煙" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">不隨意動火或吸煙</span></label>
-            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="safety_rules" value="發現不安全狀況立即通知管理單位" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">發現不安全狀況立即通知管理單位</span></label>
-          </div>
-        </section>
-
-        <section class="space-y-4">
-          <label class="block text-slate-800 font-black text-lg border-l-8 border-blue-700 pl-4">7. 緊急應變資訊 *</label>
-          <div class="grid grid-cols-1 gap-3">
-            <label class="flex items-center p-5 bg-amber-50 border-2 border-amber-200 rounded-2xl cursor-pointer shadow-sm">
-              <input type="checkbox" name="emergency_info" value="我已獲知緊急集合點位置" required class="w-7 h-7 mr-4 text-amber-600">
-              <span class="text-xs font-bold text-amber-900 leading-tight uppercase tracking-tight">我已獲知緊急集合點位置 (Emergency assembly point location)</span>
-            </label>
-            <label class="flex items-center p-5 bg-amber-50 border-2 border-amber-200 rounded-2xl cursor-pointer shadow-sm">
-              <input type="checkbox" name="emergency_info" value="我已獲知緊急聯絡人資訊" required class="w-7 h-7 mr-4 text-amber-600">
-              <span class="text-xs font-bold text-amber-900 leading-tight uppercase tracking-tight">我已獲知緊急聯絡人資訊 (Emergency contact person's information)</span>
-            </label>
-          </div>
-        </section>
-
-        <section class="pt-6 border-t-4 border-slate-100">
-          <label class="flex items-start p-8 bg-emerald-700 rounded-3xl cursor-pointer shadow-xl hover:bg-emerald-800 transition-all">
-            <input type="checkbox" name="agreement" value="我完全理解並將嚴格遵守上述安全公告的規定" required class="w-8 h-8 mr-4 flex-shrink-0">
-            <span class="text-lg font-black text-white leading-tight">我完全理解並將嚴格遵守上述安全公告的規定。<br><span class="text-sm font-normal opacity-80 italic uppercase">I fully understand and will strictly abide by the above safety inductions.</span></span>
-          </label>
-        </section>
+        <!-- 動態題目將被渲染在這裡 -->
+        <div id="dynamicFields" class="space-y-8"></div>
 
         <button type="submit" id="submitBtn" class="w-full bg-blue-800 hover:bg-black text-white font-black py-6 rounded-3xl shadow-2xl text-2xl transition-all">
-          確認提交安全申報 (Confirm Submission)
+          確認提交 (Confirm Submission)
         </button>
       </form>
     </div>
 
-    <!-- 送出成功後的畫面 -->
+    <!-- 送出成功畫面 -->
     <div id="successMsg" class="hidden bg-white p-20 rounded-3xl shadow-2xl text-center space-y-6">
       <div class="w-32 h-32 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-6xl text-emerald-600">
         <i class="fas fa-check-double"></i>
       </div>
       <h2 class="text-4xl font-black text-slate-800">提交成功！</h2>
-      <p class="text-slate-500 font-bold uppercase tracking-wide">Submission Successful</p>
+      <p id="successText" class="text-slate-500 font-bold uppercase tracking-wide">Submission Successful</p>
       <button id="resetBtn" class="bg-blue-800 hover:bg-blue-900 text-white font-black py-4 px-12 rounded-2xl shadow-lg transition-all active:scale-95">
         填寫下一份 (Fill another)
       </button>
     </div>
   </div>
 
+  <!-- Firebase 與核心邏輯 -->
   <script type="module">
-    // 引入 Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // 您的 Firebase 專案設定
+    // Firebase 專案設定
     const firebaseConfig = {
       apiKey: "AIzaSyDwAD3O6uNDWQoNITdeOEc4LqfLKC_IZRQ",
       authDomain: "tahoxdsafty.firebaseapp.com",
@@ -165,68 +87,180 @@
       appId: "1:863527866169:web:eade7a0a7cfccf1be3a2e8"
     };
 
-    // 初始化 Firebase 與 Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 綁定 UI 元素
-    const form = document.getElementById('safetyForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const formContainer = document.getElementById('formContainer');
-    const successMsg = document.getElementById('successMsg');
-    const dateInput = document.getElementById('todayDate');
+    // 全域變數
+    let schemaQuestions = [];
+    let successMessageText = "Submission Successful";
 
-    // 設定今日日期
-    const setDate = () => dateInput.value = new Date().toISOString().split('T')[0];
-    setDate();
-
-    // 監聽表單送出事件
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault(); // 阻擋預設重整行為
-      
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>正在儲存中 (Saving)...';
-
-      // 擷取表單所有資料
-      const formData = new FormData(form);
-      
-      // 整理為物件結構
-      const submissionData = {
-        name: formData.get('name'),
-        company: formData.get('company') || "",
-        role: formData.get('role'),
-        visit_date: formData.get('visit_date'),
-        risk_awareness: formData.get('risk_awareness'),
-        safety_rules: formData.getAll('safety_rules').join(", "),
-        emergency_info: formData.getAll('emergency_info').join(", "),
-        agreement: formData.get('agreement'),
-        createdAt: serverTimestamp() // Firestore 時間戳記
-      };
-
+    // 啟動時立即執行資料抓取與渲染
+    window.addEventListener('DOMContentLoaded', async () => {
       try {
-        // 直接推送到 Firestore
-        await addDoc(collection(db, "submissions"), submissionData);
-        
-        // 成功後隱藏表單，顯示成功畫面
-        formContainer.classList.add('hidden');
-        successMsg.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // 1. 獲取表單「設定 (Config)」
+        const configSnap = await getDoc(doc(db, "form_app", "config"));
+        if (configSnap.exists()) {
+          const config = configSnap.data();
+          if (config.FORM_TITLE) document.getElementById('mainTitle').innerText = config.FORM_TITLE;
+          if (config.FORM_SUBTITLE) document.getElementById('subTitle').innerText = config.FORM_SUBTITLE;
+          if (config.SUCCESS_MSG) successMessageText = config.SUCCESS_MSG;
+          
+          // 若設定檔標示停用，則隱藏按鈕並提示
+          if (config.IS_ACTIVE === false || config.IS_ACTIVE === 'FALSE') {
+            document.getElementById('loadingOverlay').innerHTML = `<p class="text-red-600 font-black text-2xl">表單目前尚未開放填寫 (Form is currently closed)</p>`;
+            return; 
+          }
+        }
+
+        // 2. 獲取表單「題目 (Schema)」
+        const schemaSnap = await getDoc(doc(db, "form_app", "schema"));
+        if (schemaSnap.exists()) {
+          schemaQuestions = schemaSnap.data().questions || [];
+          renderDynamicForm(schemaQuestions);
+        } else {
+          throw new Error("無法取得題目配置");
+        }
+
+        // 隱藏載入中，顯示表單
+        document.getElementById('loadingOverlay').classList.add('hidden');
+        document.getElementById('safetyForm').classList.remove('hidden');
+
       } catch (error) {
-        console.error("Error adding document: ", error);
-        alert("寫入失敗：" + error.message);
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "確認提交安全申報 (Confirm Submission)";
+        console.error("初始化錯誤:", error);
+        document.getElementById('loadingOverlay').innerHTML = `<p class="text-red-600 font-bold text-xl">載入失敗：請聯絡管理員確認 Firebase 設定。</p>`;
       }
     });
 
-    // 監聽重新填寫按鈕
-    resetBtn.addEventListener('click', () => {
+    /**
+     * 負責將 JSON Schema 轉換為美觀的 Tailwind HTML 介面
+     */
+    function renderDynamicForm(questions) {
+      const container = document.getElementById('dynamicFields');
+      container.innerHTML = '';
+      
+      questions.forEach(q => {
+        // 檢查是否必填 (容許布林值或字串)
+        const isRequired = q.required === true || String(q.required).toUpperCase() === 'TRUE';
+        const reqMark = isRequired ? '<span class="text-red-500 ml-1 text-xl">*</span>' : '';
+        const options = q.options ? q.options.split('|').map(o => o.trim()).filter(o => o) : [];
+        let html = '';
+
+        // 統一的區塊容器與標題樣式 (呈現俐落的白色卡片)
+        const sectionWrapperStart = `
+          <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300">
+            <h3 class="flex items-center text-lg md:text-xl font-black text-slate-800 mb-5">
+              <div class="w-1.5 h-6 bg-blue-600 rounded-full mr-3"></div>${q.label} ${reqMark}
+            </h3>`;
+        const sectionWrapperEnd = `</div>`;
+
+        if (q.type === 'text') {
+          html = sectionWrapperStart + `
+            <input type="text" name="${q.id}" ${isRequired ? 'required' : ''} class="input-focus-effect w-full bg-slate-50 border-2 border-slate-200 text-slate-800 rounded-xl p-4 outline-none font-bold transition-all text-lg">
+          ` + sectionWrapperEnd;
+        } 
+        else if (q.type === 'date') {
+          html = sectionWrapperStart + `
+            <input type="date" name="${q.id}" ${isRequired ? 'required' : ''} class="w-full md:w-64 input-focus-effect bg-slate-50 border-2 border-slate-200 text-slate-800 rounded-xl p-4 outline-none font-bold transition-all date-auto-fill text-lg">
+          ` + sectionWrapperEnd;
+        } 
+        else if (q.type === 'radio') {
+          // 動態排版：選項少於等於4則以網格顯示，否則2欄顯示
+          const gridCols = options.length <= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'md:grid-cols-2';
+          let optsHtml = options.map((opt, i) => `
+            <div class="flex">
+              <input type="radio" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="card-selector hidden" ${isRequired && i === 0 ? 'required' : ''}>
+              <label for="${q.id}_${i}" class="flex items-center w-full p-4 border-2 border-slate-200 bg-slate-50/50 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all">
+                <i class="fas fa-check-circle mr-3 text-slate-300 icon-box text-xl flex-shrink-0"></i>
+                <span class="text-sm md:text-base font-bold text-slate-700">${opt}</span>
+              </label>
+            </div>
+          `).join('');
+
+          html = sectionWrapperStart + `<div class="grid grid-cols-1 ${gridCols} gap-3">${optsHtml}</div>` + sectionWrapperEnd;
+        } 
+        else if (q.type === 'checkbox') {
+          // 針對特殊選項進行配色微調，但保持結構完全一致的卡片風格
+          if (q.id === 'agreement') {
+            let optsHtml = options.map((opt, i) => `
+              <label class="flex items-start p-5 md:p-6 bg-emerald-50/50 border-2 border-emerald-300 rounded-xl cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all group">
+                <input type="checkbox" name="${q.id}" value="${opt}" ${isRequired ? 'required' : ''} class="w-7 h-7 mt-0.5 mr-4 rounded text-emerald-600 focus:ring-emerald-500 border-emerald-400 flex-shrink-0 cursor-pointer">
+                <span class="text-base md:text-lg font-black text-emerald-900 leading-relaxed group-hover:text-emerald-700 transition-colors">${opt}</span>
+              </label>
+            `).join('');
+            html = sectionWrapperStart + `<div class="space-y-3">${optsHtml}</div>` + sectionWrapperEnd;
+          } 
+          else if (q.id === 'emergency_info') {
+            let optsHtml = options.map((opt, i) => `
+              <label class="flex items-center p-4 md:p-5 bg-amber-50/50 border-2 border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50 hover:border-amber-300 transition-all group">
+                <input type="checkbox" name="${q.id}" value="${opt}" ${isRequired ? 'required' : ''} class="w-6 h-6 mr-4 rounded text-amber-600 focus:ring-amber-500 border-amber-300 flex-shrink-0 cursor-pointer">
+                <span class="text-sm md:text-base font-bold text-amber-900 leading-tight group-hover:text-amber-700 transition-colors">${opt}</span>
+              </label>
+            `).join('');
+            html = sectionWrapperStart + `<div class="grid grid-cols-1 gap-3">${optsHtml}</div>` + sectionWrapperEnd;
+          } 
+          else {
+            // 預設 Checkbox (例如：安全行為準則)
+            let optsHtml = options.map((opt, i) => `
+              <label class="flex items-center p-4 bg-slate-50/50 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all group">
+                <input type="checkbox" name="${q.id}" value="${opt}" ${isRequired ? 'required' : ''} class="w-6 h-6 mr-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 flex-shrink-0 cursor-pointer">
+                <span class="text-sm md:text-base font-bold text-slate-700 tracking-tight group-hover:text-blue-700 transition-colors">${opt}</span>
+              </label>
+            `).join('');
+            html = sectionWrapperStart + `<div class="grid grid-cols-1 gap-3">${optsHtml}</div>` + sectionWrapperEnd;
+          }
+        }
+        container.insertAdjacentHTML('beforeend', html);
+      });
+
+      // 自動填寫今日日期
+      document.querySelectorAll('.date-auto-fill').forEach(el => {
+        el.value = new Date().toISOString().split('T')[0];
+      });
+    }
+
+    // 處理表單送出
+    const form = document.getElementById('safetyForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); 
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>正在儲存中 (Saving)...';
+
+      const formData = new FormData(form);
+      const submissionData = { createdAt: serverTimestamp() };
+
+      // 動態擷取所有被定義在 Schema 中的欄位資料
+      schemaQuestions.forEach(q => {
+        if (q.type === 'checkbox') {
+          submissionData[q.id] = formData.getAll(q.id).join(", ");
+        } else {
+          submissionData[q.id] = formData.get(q.id) || "";
+        }
+      });
+
+      try {
+        await addDoc(collection(db, "submissions"), submissionData);
+        
+        document.getElementById('successText').innerText = successMessageText;
+        document.getElementById('formContainer').classList.add('hidden');
+        document.getElementById('successMsg').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (error) {
+        console.error("寫入錯誤:", error);
+        alert("寫入失敗：" + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "確認提交 (Confirm Submission)";
+      }
+    });
+
+    // 重新填寫按鈕
+    document.getElementById('resetBtn').addEventListener('click', () => {
       form.reset();
-      setDate();
-      successMsg.classList.add('hidden');
-      formContainer.classList.remove('hidden');
+      document.querySelectorAll('.date-auto-fill').forEach(el => el.value = new Date().toISOString().split('T')[0]);
+      document.getElementById('successMsg').classList.add('hidden');
+      document.getElementById('formContainer').classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   </script>
