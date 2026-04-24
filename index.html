@@ -96,7 +96,7 @@
         </div>
 
         <button type="submit" id="submitBtn" class="w-full bg-blue-800 hover:bg-black text-white font-black py-6 rounded-3xl shadow-2xl text-2xl transition-all flex justify-center items-center">
-          <span id="submitBtnText">確認提交 (Confirm Submission)</span>
+          <span id="submitBtnText">確認提交</span>
         </button>
       </form>
     </div>
@@ -433,7 +433,7 @@
       }
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>' + t('正在儲存中 (Saving)...');
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>' + t('正在儲存中...');
 
       const formData = new FormData(form);
       const submissionData = { 
