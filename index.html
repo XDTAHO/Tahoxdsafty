@@ -1,90 +1,202 @@
-<!-- 前面 UI 部分保持不變，重點修正 script 內的提交邏輯 -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, getIdToken } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+<!-- ... existing code ... -->
+          <div class="h-px w-full bg-blue-400 opacity-30 my-4"></div>
+          
+          <p class="text-blue-50 text-sm md:text-base font-medium leading-relaxed max-w-2xl mx-auto">
+            Please read and acknowledge the potential risks and safety guidelines before entering the premises.<br>
+            <span class="font-bold">(進入本場所前，請務必閱讀並確認潛在風險與安全指南。)</span>
+          </p>
+        </div>
+      </div>
 
-  // Firebase 配置 (保持原本內容)
-  const firebaseConfig = {
-    apiKey: "AIzaSyDwAD3O6uNDWQoNITdeOEc4LqfLKC_IZRQ",
-    authDomain: "tahoxdsafty.firebaseapp.com",
-    projectId: "tahoxdsafty",
-    storageBucket: "tahoxdsafty.firebasestorage.app",
-    messagingSenderId: "863527866169",
-    appId: "1:863527866169:web:eade7a0a7cfccf1be3a2e8",
-    measurementId: "G-7EZNY89CC6"
-  };
+      <!-- 移除了原本的 onsubmit 屬性，改由 JavaScript 監聽 -->
+      <form id="safetyForm" class="bg-white p-6 md:p-12 rounded-b-3xl shadow-2xl space-y-10">
+        
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border-2 border-slate-200 shadow-sm">
+          <div class="space-y-2">
+            <label class="block text-blue-900 font-black text-sm">1. 真實姓名 (Name) *</label>
+            <input type="text" name="name" required class="input-focus-effect w-full border-2 border-slate-300 rounded-xl p-4 outline-none">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-blue-900 font-black text-sm">2. 公司 / Company</label>
+            <input type="text" name="company" class="input-focus-effect w-full border-2 border-slate-300 rounded-xl p-4 outline-none">
+          </div>
+        </section>
 
-  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbvV2p_1-ZSc9lqFNx7UvvC_Qg_wHfAqLgxsbNpGCMHJNY_ho8bw-sKH8LDNsdVlNEZX/exec";
+        <section class="space-y-4">
+          <label class="block text-slate-800 font-black text-lg border-l-8 border-blue-700 pl-4">3. 您的身份 / Role *</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <input type="radio" name="role" id="role1" value="訪客 (Visitor) General" class="card-selector hidden" required>
+            <label for="role1" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
+<!-- ... existing code ... -->
+              <span class="text-xs font-bold text-slate-700">訪客 (Visitor)</span>
+            </label>
+            <input type="radio" name="role" id="role2" value="新進人員 (New Employee HQ)" class="card-selector hidden">
+            <label for="role2" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
+              <i class="fas fa-building text-2xl mb-2 text-slate-400 icon-box"></i>
+<!-- ... existing code ... -->
+              <span class="text-xs font-bold text-slate-700">新進人員 (HQ)</span>
+            </label>
+            <input type="radio" name="role" id="role3" value="新進人員(New Employee Site)" class="card-selector hidden">
+            <label for="role3" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
+              <i class="fas fa-helmet-safety text-2xl mb-2 text-slate-400 icon-box"></i>
+<!-- ... existing code ... -->
+              <span class="text-xs font-bold text-slate-700">新進人員 (Site)</span>
+            </label>
+            <input type="radio" name="role" id="role4" value="承攬商 (Contractor)" class="card-selector hidden">
+            <label for="role4" class="flex flex-col items-center p-6 border-2 border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all text-center shadow-sm">
+              <i class="fas fa-hard-hat text-2xl mb-2 text-slate-400 icon-box"></i>
+              <span class="text-xs font-bold text-slate-700">承攬商 (Contractor)</span>
+            </label>
+          </div>
+        </section>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
+        <section class="p-6 bg-slate-50 rounded-2xl border-2 border-slate-200">
+          <label class="block text-slate-800 font-black text-sm mb-3">4. 日期 (Date)</label>
+          <input type="date" name="visit_date" id="todayDate" class="w-full md:w-64 border-2 border-slate-300 rounded-xl p-4 bg-white font-bold outline-none">
+        </section>
 
-  // 監聽登入
-  onAuthStateChanged(auth, (user) => {
-    const formOverlay = document.getElementById('formOverlay');
-    const userInfo = document.getElementById('userInfo');
-    if (user) {
-      formOverlay.classList.add('hidden');
-      formOverlay.style.display = 'none';
-      userInfo.classList.remove('hidden');
-      document.getElementById('userNameDisplay').innerText = `${user.displayName}`;
-    } else {
-      formOverlay.classList.remove('hidden');
-      formOverlay.style.display = 'flex';
-      userInfo.classList.add('hidden');
-    }
-  });
+        <section class="space-y-4">
+          <label class="block text-slate-800 font-black text-lg border-l-8 border-blue-700 pl-4">5. 主要風險危害區域告知 *</label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="flex"><input type="radio" name="risk_awareness" id="risk1" value="威立雅安全政策 (Veolia Safety Policy)" class="card-selector hidden" required><label for="risk1" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-file-shield mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">威立雅安全政策 (Veolia Safety Policy)</span></label></div>
+            <div class="flex"><input type="radio" name="risk_awareness" id="risk2" value="威立雅十大求生規則 (12 LSR & HRMS)" class="card-selector hidden"><label for="risk2" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-clipboard-list mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">威立雅十大求生規則 (12 LSR & HRMS)</span></label></div>
+            <div class="flex"><input type="radio" name="risk_awareness" id="risk3" value="車輛/堆高機作業區域 (Vehicle/Forklift Operation Areas)" class="card-selector hidden"><label for="risk3" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-truck-moving mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">車輛/堆高機作業區域 (Vehicle/Forklift)</span></label></div>
+            <div class="flex"><input type="radio" name="risk_awareness" id="risk4" value="高溫/高壓區域 (High Temperature/High Pressure Areas)" class="card-selector hidden"><label for="risk4" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-temperature-high mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">高溫/高壓區域 (High Temperature/Pressure)</span></label></div>
+            <div class="flex"><input type="radio" name="risk_awareness" id="risk5" value="高處作業/墜落風險區 (Work at Height/Fall Risk Areas)" class="card-selector hidden"><label for="risk5" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-mountain mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">高處作業/墜落風險區 (Work at Height)</span></label></div>
+            <div class="flex"><input type="radio" name="risk_awareness" id="risk6" value="感電危險區 (Electrical Hazard Zones)" class="card-selector hidden"><label for="risk6" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-bolt mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">感電危險區 (Electrical Hazard Zones)</span></label></div>
+            <div class="flex"><input type="radio" name="risk_awareness" id="risk7" value="化學品儲存/使用區 (Chemical Storage/Usage Areas)" class="card-selector hidden"><label for="risk7" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-flask mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">化學品儲存/使用區 (Chemical Storage)</span></label></div>
+            <div class="flex"><input type="radio" name="risk_awareness" id="risk8" value="噪音區域 (Noise Areas)" class="card-selector hidden"><label for="risk8" class="flex items-center w-full p-4 border-2 border-slate-300 rounded-xl cursor-pointer hover:shadow-md"><i class="fas fa-ear-deaf mr-3 text-blue-600 icon-box"></i><span class="text-xs font-bold text-slate-700 uppercase">噪音區域 (Noise Areas)</span></label></div>
+          </div>
+        </section>
 
-  document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, provider);
-  document.getElementById('logoutBtn').onclick = () => signOut(auth);
+        <section class="bg-blue-50 p-6 md:p-8 rounded-3xl border-2 border-blue-200 shadow-inner space-y-4">
+          <p class="font-black text-blue-900 flex items-center"><i class="fas fa-check-double mr-2"></i>6. 安全行為準則 (請全數勾選)</p>
+          <div class="grid grid-cols-1 gap-3">
+            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="safety_rules" value="配戴必要的個人防護裝備 (PPE)" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">配戴必要的個人防護裝備 (PPE)</span></label>
+            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="safety_rules" value="遵守所有安全標誌與警告" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">遵守所有安全標誌與警告</span></label>
+            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="safety_rules" value="不隨意動火或吸煙" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">不隨意動火或吸煙</span></label>
+            <label class="flex items-center p-4 bg-white border border-blue-100 rounded-xl cursor-pointer shadow-sm"><input type="checkbox" name="safety_rules" value="發現不安全狀況立即通知管理單位" required class="w-6 h-6 mr-4"><span class="text-xs font-bold text-slate-700 uppercase tracking-tight">發現不安全狀況立即通知管理單位</span></label>
+          </div>
+        </section>
 
-  // 表單提交
-  document.getElementById('safetyForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const user = auth.currentUser;
-    if (!user) return alert("請登入後再提交");
+        <section class="space-y-4">
+          <label class="block text-slate-800 font-black text-lg border-l-8 border-blue-700 pl-4">7. 緊急應變資訊 *</label>
+          <div class="grid grid-cols-1 gap-3">
+            <label class="flex items-center p-5 bg-amber-50 border-2 border-amber-200 rounded-2xl cursor-pointer shadow-sm">
+              <input type="checkbox" name="emergency_info" value="我已獲知緊急集合點位置" required class="w-7 h-7 mr-4 text-amber-600">
+              <span class="text-xs font-bold text-amber-900 leading-tight uppercase tracking-tight">我已獲知緊急集合點位置 (Emergency assembly point location)</span>
+            </label>
+            <label class="flex items-center p-5 bg-amber-50 border-2 border-amber-200 rounded-2xl cursor-pointer shadow-sm">
+              <input type="checkbox" name="emergency_info" value="我已獲知緊急聯絡人資訊" required class="w-7 h-7 mr-4 text-amber-600">
+              <span class="text-xs font-bold text-amber-900 leading-tight uppercase tracking-tight">我已獲知緊急聯絡人資訊 (Emergency contact person's information)</span>
+            </label>
+          </div>
+        </section>
 
-    const btn = document.getElementById('submitBtn');
-    const originalText = btn.innerText;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 提交中...';
+        <section class="pt-6 border-t-4 border-slate-100">
+          <label class="flex items-start p-8 bg-emerald-700 rounded-3xl cursor-pointer shadow-xl hover:bg-emerald-800 transition-all">
+            <input type="checkbox" name="agreement" value="我完全理解並將嚴格遵守上述安全公告的規定" required class="w-8 h-8 mr-4 flex-shrink-0">
+            <span class="text-lg font-black text-white leading-tight">我完全理解並將嚴格遵守上述安全公告的規定。<br><span class="text-sm font-normal opacity-80 italic uppercase">I fully understand and will strictly abide by the above safety inductions.</span></span>
+          </label>
+        </section>
 
-    try {
-      // 強制取得最新的 ID Token
-      const idToken = await getIdToken(user, true);
-      const fd = new FormData(e.target);
-      const data = {};
+        <button type="submit" id="submitBtn" class="w-full bg-blue-800 hover:bg-black text-white font-black py-6 rounded-3xl shadow-2xl text-2xl transition-all">
+          確認提交安全申報 (Confirm Submission)
+        </button>
+      </form>
+    </div>
+
+    <div id="successMsg" class="hidden bg-white p-20 rounded-3xl shadow-2xl text-center space-y-6">
+<!-- ... existing code ... -->
+      <h2 class="text-4xl font-black text-slate-800">提交成功！</h2>
+      <p class="text-slate-500 font-bold uppercase tracking-wide">Submission Successful</p>
+      <!-- 改寫了按鈕的 onClick 事件綁定 -->
+      <button id="resetBtn" class="bg-blue-800 hover:bg-blue-900 text-white font-black py-4 px-12 rounded-2xl shadow-lg transition-all active:scale-95">
+        填寫下一份 (Fill another)
+      </button>
+    </div>
+  </div>
+
+  <!-- 替換掉原本依賴 google.script.run 的邏輯，改用 Firebase JS SDK (ES Module) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // 您剛才取得的 Firebase 專案設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwAD3O6uNDWQoNITdeOEc4LqfLKC_IZRQ",
+      authDomain: "tahoxdsafty.firebaseapp.com",
+      projectId: "tahoxdsafty",
+      storageBucket: "tahoxdsafty.firebasestorage.app",
+      messagingSenderId: "863527866169",
+      appId: "1:863527866169:web:eade7a0a7cfccf1be3a2e8"
+    };
+
+    // 初始化 Firebase 與 Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 綁定 UI 元素
+    const form = document.getElementById('safetyForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const formContainer = document.getElementById('formContainer');
+    const successMsg = document.getElementById('successMsg');
+    const dateInput = document.getElementById('todayDate');
+
+    // 設定今日日期
+    const setDate = () => dateInput.value = new Date().toISOString().split('T')[0];
+    setDate();
+
+    // 監聽表單送出事件
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); // 阻擋預設重新整理
       
-      fd.forEach((value, key) => {
-        if (data[key]) {
-          data[key] = data[key] + ", " + value;
-        } else {
-          data[key] = value;
-        }
-      });
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>正在儲存中 (Saving)...';
 
-      const response = await fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors', // 重要：GAS 的重導向常導致 CORS 錯誤，使用 no-cors 可確保請求發出，但看不到詳細回傳內容
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ token: idToken, formData: data })
-      });
+      // 擷取表單所有資料
+      const formData = new FormData(form);
+      
+      // 整理為與 GAS Schema 匹配的物件結構
+      const submissionData = {
+        name: formData.get('name'),
+        company: formData.get('company') || "", // 確保非必填欄位為空時不報錯
+        role: formData.get('role'),
+        visit_date: formData.get('visit_date'),
+        risk_awareness: formData.get('risk_awareness'),
+        // Checkbox 多選項會被合併成字串，以符合 Sheet 格式
+        safety_rules: formData.getAll('safety_rules').join(", "),
+        emergency_info: formData.getAll('emergency_info').join(", "),
+        agreement: formData.get('agreement'),
+        createdAt: serverTimestamp() // Firestore 的伺服器建立時間
+      };
 
-      // 由於使用了 no-cors，我們無法直接讀取 response.json()
-      // 如果需要讀取回傳值，必須將 mode 改回 'cors' 並確保 GAS 部署為「所有人」
-      
-      // 假設正常運作 (因為 no-cors 無法抓取回傳結果，建議先用 cors 模式調試)
-      alert("提交指令已發送！請檢查試算表。");
-      document.getElementById('formContainer').classList.add('hidden');
-      document.getElementById('successMsg').classList.remove('hidden');
-      
-    } catch (err) {
-      console.error(err);
-      alert("發生錯誤: " + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.innerText = originalText;
-    }
-  };
-</script>
+      try {
+        // 直接將資料推送到 Firestore 的 'submissions' 集合中
+        await addDoc(collection(db, "submissions"), submissionData);
+        
+        // 成功後隱藏表單，顯示成功畫面
+        formContainer.classList.add('hidden');
+        successMsg.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        alert("寫入失敗：" + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "確認提交安全申報 (Confirm Submission)";
+      }
+    });
+
+    // 監聽重新填寫按鈕
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      setDate();
+      successMsg.classList.add('hidden');
+      formContainer.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>
