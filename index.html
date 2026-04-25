@@ -524,7 +524,8 @@
       }
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2 md:mr-3"></i>' + t('正在儲存中 (Saving)...');
+      // [修正] 精準替換 span 的內容，避免破壞 DOM 結構導致翻譯函數報錯
+      document.getElementById('submitBtnText').innerHTML = '<i class="fas fa-spinner fa-spin mr-2 md:mr-3"></i>' + t('正在儲存中 (Saving)...');
 
       const formData = new FormData(form);
       const submissionData = { 
