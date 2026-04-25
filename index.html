@@ -43,7 +43,8 @@
     .custom-input:checked + .custom-label-emerald .icon-checked { display: inline-block !important; }
   </style>
 </head>
-<body class="bg-slate-200 min-h-screen p-2 md:p-8 text-slate-800 relative">
+<!-- 【修復 2】將 min-h-screen 改為 min-h-[100dvh]，完美解決 iOS Safari 底部被遮擋的問題 -->
+<body class="bg-slate-200 min-h-[100dvh] p-2 md:p-8 text-slate-800 relative">
 
   <!-- 【修復 3】LINE / FB 內建瀏覽器阻擋與提示畫面 -->
   <div id="inAppBrowserWarning" class="fixed inset-0 bg-slate-900 z-[9999] hidden flex-col items-center justify-center text-white p-6 text-center">
