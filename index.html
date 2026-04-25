@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>訪客風險危害告知系統</title>
   
-  <!-- [優化 1] DNS 預先連線：提早打通與 Firebase 的網路通道，加速載入 -->
+  <!-- DNS 預先連線：提早打通與 Firebase 的網路通道，加速載入 -->
   <link rel="preconnect" href="https://firestore.googleapis.com">
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 
-  <!-- [恢復] 使用 Tailwind CDN：確保 JIT 引擎能完美解析 JavaScript 內動態生成的樣式 -->
+  <!-- 使用 Tailwind CDN：確保 JIT 引擎能完美解析 JavaScript 內動態生成的樣式 -->
   <script src="https://cdn.tailwindcss.com"></script>
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -372,35 +372,34 @@
     document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
 
     // ==========================================
-    // 載入與初始化
+    // 載入與初始化 (改由 Cloudflare Pages Functions 極速載入)
     // ==========================================
+    // [修改] 直接使用相對路徑，指向 functions/api/form.js
+    const WORKER_URL = '/api/form'; 
+
     window.addEventListener('DOMContentLoaded', async () => {
       try {
-        const [configSnap, schemaSnap, i18nSnap] = await Promise.all([
-          getDoc(doc(db, "form_app", "config")),
-          getDoc(doc(db, "form_app", "schema")),
-          getDoc(doc(db, "form_app", "i18n"))
-        ]);
+        const response = await fetch(WORKER_URL);
+        if (!response.ok) throw new Error("無法取得設定");
+        const data = await response.json();
 
-        if (configSnap.exists()) configDataCache = configSnap.data();
-        if (schemaSnap.exists()) schemaQuestions = schemaSnap.data().questions || [];
+        configDataCache = data.config || {};
+        schemaQuestions = data.schema?.questions || [];
+        const i18nData = data.i18n || {};
         
-        if (i18nSnap.exists()) {
-          const i18nData = i18nSnap.data();
-          if (i18nData.supported_languages) {
-            i18nData.supported_languages.forEach(lang => {
-               if(lang.code !== 'zh-TW') supportedLangs.push(lang);
-            });
-          }
-          Object.keys(i18nData).forEach(key => {
-            if (key.startsWith('dict_')) {
-              const code = key.replace('dict_', '');
-              try { i18nDicts[code] = JSON.parse(i18nData[key]); } catch(e) {}
-            }
+        if (i18nData.supported_languages) {
+          i18nData.supported_languages.forEach(lang => {
+             if(lang.code !== 'zh-TW') supportedLangs.push(lang);
           });
         }
+        Object.keys(i18nData).forEach(key => {
+          if (key.startsWith('dict_')) {
+            const code = key.replace('dict_', '');
+            try { i18nDicts[code] = JSON.parse(i18nData[key]); } catch(e) {}
+          }
+        });
 
-        if (configDataCache.IS_ACTIVE === false || configDataCache.IS_ACTIVE === 'FALSE') {
+        if (configDataCache.IS_ACTIVE === false || String(configDataCache.IS_ACTIVE).toUpperCase() === 'FALSE') {
           document.getElementById('loadingOverlay').innerHTML = `<p class="text-red-600 font-black text-xl md:text-2xl">表單目前尚未開放填寫 (Form is currently closed)</p>`;
           return; 
         }
@@ -417,7 +416,7 @@
 
       } catch (error) {
         console.error("初始化錯誤:", error);
-        document.getElementById('loadingOverlay').innerHTML = `<p class="text-red-600 font-bold text-lg md:text-xl">載入失敗：請聯絡管理員確認 Firebase 設定。</p>`;
+        document.getElementById('loadingOverlay').innerHTML = `<p class="text-red-600 font-bold text-lg md:text-xl">載入失敗：無法連線至雲端節點。</p>`;
       }
     });
 
@@ -526,7 +525,7 @@
       });
     };
 
-    // [新增] 自訂必填欄位攔截與動畫提示
+    // 自訂必填欄位攔截與動畫提示
     submitBtn.addEventListener('click', (e) => {
       if (!form.checkValidity()) {
         e.preventDefault(); // 阻止表單安靜失敗
