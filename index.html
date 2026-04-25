@@ -4,7 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>訪客風險危害告知系統</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- [優化 1] DNS 預先連線：提早打通與 Firebase 的網路通道，加速載入 -->
+  <link rel="preconnect" href="https://firestore.googleapis.com">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+
+  <!-- [優化 2] 拔除 CDN，改用本地極小化的 style.css -->
+  <link rel="stylesheet" href="style.css">
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* 輸入框焦點效果 */
