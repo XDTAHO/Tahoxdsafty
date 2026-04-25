@@ -5,72 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>訪客風險危害告知系統</title>
   
-  <!-- DNS 預先連線：提早打通與 Firebase 的網路通道，加速載入 -->
   <link rel="preconnect" href="https://firestore.googleapis.com">
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-
-  <!-- 使用 Tailwind CDN：確保 JIT 引擎能完美解析 JavaScript 內動態生成的樣式 -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
-    /* 輸入框焦點效果 */
     .input-focus-effect:focus {
       background-color: white;
       border-color: #1d4ed8;
       box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1);
     }
-    
-    /* =========================================
-       高對比選取狀態 (High Contrast Selection)
-       ========================================= */
-    /* 隱藏原生輸入框，由 label 代理點擊。改用 sr-only 寫法解決必填驗證失效問題 */
     .custom-input { 
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border-width: 0;
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
     }
-
-    /* --- Radio & 一般 Checkbox (亮藍色主題) --- */
     .custom-input:checked + .custom-label-blue {
-      border-color: #2563eb !important;     /* blue-600 */
-      background-color: #dbeafe !important; /* blue-100 高對比底色 */
+      border-color: #2563eb !important; background-color: #dbeafe !important;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
-    .custom-input:checked + .custom-label-blue .text-desc { color: #1e3a8a !important; } /* blue-900 文字 */
+    .custom-input:checked + .custom-label-blue .text-desc { color: #1e3a8a !important; }
     .custom-input:checked + .custom-label-blue .icon-unchecked { display: none !important; }
     .custom-input:checked + .custom-label-blue .icon-checked { display: inline-block !important; }
-
-    /* --- 緊急應變 Checkbox (琥珀色主題) --- */
     .custom-input:checked + .custom-label-amber {
-      border-color: #d97706 !important;     /* amber-600 */
-      background-color: #fef3c7 !important; /* amber-100 高對比底色 */
+      border-color: #d97706 !important; background-color: #fef3c7 !important;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
-    .custom-input:checked + .custom-label-amber .text-desc { color: #78350f !important; } /* amber-900 文字 */
+    .custom-input:checked + .custom-label-amber .text-desc { color: #78350f !important; }
     .custom-input:checked + .custom-label-amber .icon-unchecked { display: none !important; }
     .custom-input:checked + .custom-label-amber .icon-checked { display: inline-block !important; }
-
-    /* --- 同意宣告 Checkbox (實心綠色主題) --- */
     .custom-input:checked + .custom-label-emerald {
-      border-color: #059669 !important;     /* emerald-600 */
-      background-color: #059669 !important; /* emerald-600 實心底色 */
+      border-color: #059669 !important; background-color: #059669 !important;
       box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.4) !important;
     }
-    .custom-input:checked + .custom-label-emerald .text-desc { color: #ffffff !important; } /* 純白文字 */
+    .custom-input:checked + .custom-label-emerald .text-desc { color: #ffffff !important; }
     .custom-input:checked + .custom-label-emerald .icon-unchecked { display: none !important; }
     .custom-input:checked + .custom-label-emerald .icon-checked { display: inline-block !important; }
   </style>
 </head>
-<body class="bg-slate-200 min-h-screen p-2 md:p-8 text-slate-800">
+<body class="bg-slate-200 min-h-screen p-2 md:p-8 text-slate-800 relative">
 
-  <div class="max-w-4xl mx-auto">
+  <!-- 【修復 3】LINE / FB 內建瀏覽器阻擋與提示畫面 -->
+  <div id="inAppBrowserWarning" class="fixed inset-0 bg-slate-900 z-[9999] hidden flex-col items-center justify-center text-white p-6 text-center">
+    <i class="fas fa-external-link-alt text-6xl md:text-8xl mb-6 text-blue-400"></i>
+    <h2 class="text-2xl md:text-4xl font-black mb-4 tracking-wide">請在預設瀏覽器中開啟</h2>
+    <p class="text-sm md:text-lg text-slate-300 mb-8 leading-relaxed font-bold">
+      您目前使用的應用程式內建瀏覽器無法支援 Google 安全登入。<br><br>
+      請點擊右上角 (或右下角) 的選單 <span class="text-2xl font-black mx-1">⋮</span> 或 <span class="text-2xl font-black mx-1">⋯</span><br>
+      選擇 <span class="text-white bg-blue-600 px-3 py-1 rounded-lg mx-1 shadow-sm">以預設瀏覽器開啟</span><br>
+      (Safari / Chrome) 以繼續填寫表單。
+    </p>
+  </div>
+
+  <div class="max-w-4xl mx-auto" id="mainAppWrapper">
     <!-- 整個表單的容器 -->
     <div id="formContainer">
       
@@ -91,14 +78,9 @@
         <p class="text-blue-800 font-bold text-base md:text-xl tracking-widest">正在從雲端載入表單配置...</p>
       </div>
 
-      <!-- 表單本體 [新增 novalidate 阻擋原生靜默驗證，改為自訂攔截] -->
       <form id="safetyForm" class="bg-slate-50 p-4 md:p-10 rounded-b-2xl md:rounded-b-3xl shadow-2xl space-y-6 md:space-y-8 hidden" novalidate>
         
-        <!-- ================= 多語系切換區塊 ================= -->
-        <div id="langSwitcher" class="grid grid-cols-4 md:flex md:flex-wrap gap-1.5 md:gap-2 pb-2 md:pb-3 border-b-2 border-slate-200">
-          <!-- 語言按鈕將由 JS 動態生成 -->
-        </div>
-        <!-- ========================================================= -->
+        <div id="langSwitcher" class="grid grid-cols-4 md:flex md:flex-wrap gap-1.5 md:gap-2 pb-2 md:pb-3 border-b-2 border-slate-200"></div>
 
         <!-- 頂部 Google 驗證區塊 -->
         <div class="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4">
@@ -123,10 +105,8 @@
           </div>
         </div>
 
-        <!-- 動態題目渲染區塊 -->
         <div id="dynamicFields" class="space-y-6 md:space-y-8"></div>
 
-        <!-- 底部刷淡驗證區塊 -->
         <div class="pt-2 md:pt-4 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div id="bottomUnauth" class="flex items-center space-x-2 md:space-x-3">
             <span id="bottomUnauthText" class="text-xs md:text-sm font-bold text-slate-500">尚未登入，將無法提交表單</span>
@@ -159,7 +139,6 @@
     </div>
   </div>
 
-  <!-- 攔截未登入彈窗 -->
   <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center opacity-0 transition-opacity duration-300 px-4">
     <div class="bg-white p-6 md:p-10 rounded-2xl md:rounded-3xl shadow-2xl max-w-sm w-full text-center transform scale-95 transition-transform duration-300" id="loginModalContent">
       <i class="fas fa-user-lock text-5xl md:text-6xl text-blue-600 mb-4 md:mb-6"></i>
@@ -179,6 +158,18 @@
 
   <!-- Firebase 與核心邏輯 -->
   <script type="module">
+    // 【修復 3 邏輯】一載入就偵測是否為內建瀏覽器
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isLine = (ua.indexOf("Line") > -1);
+    const isFB = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
+    const isIG = (ua.indexOf("Instagram") > -1);
+    
+    if (isLine || isFB || isIG) {
+      document.getElementById('inAppBrowserWarning').classList.remove('hidden');
+      document.getElementById('inAppBrowserWarning').classList.add('flex');
+      document.getElementById('mainAppWrapper').classList.add('hidden'); // 隱藏主程式
+    }
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -200,19 +191,13 @@
     const form = document.getElementById('safetyForm');
     const submitBtn = document.getElementById('submitBtn');
 
-    // 核心資料庫
     let schemaQuestions = [];
     let configDataCache = {};
     let currentUser = null; 
-
-    // I18N 多語系狀態
     let currentLang = 'zh-TW'; 
     let supportedLangs = [{code: 'zh-TW', label: '繁體中文'}]; 
     let i18nDicts = {}; 
 
-    // ==========================================
-    // 資料暫存與恢復機制 (避免重整或切換語言時遺失)
-    // ==========================================
     const saveFormData = () => {
       const formData = new FormData(form);
       const data = {};
@@ -235,9 +220,7 @@
            if (data[q.id] !== undefined && data[q.id] !== null) {
              const elements = form.elements[q.id];
              if (!elements) return;
-
              if (q.type === 'checkbox' || q.type === 'radio') {
-               // 將 DOM Element 轉換為可遞迴的陣列
                const elList = elements.length !== undefined && !elements.tagName ? elements : [elements];
                for (let i = 0; i < elList.length; i++) {
                  if (q.type === 'checkbox') {
@@ -254,13 +237,9 @@
       } catch(e) { console.error('還原資料失敗:', e); }
     };
 
-    // 隨時監聽表單輸入並進行暫存
     form.addEventListener('input', saveFormData);
     form.addEventListener('change', saveFormData);
 
-    // ==========================================
-    // 多語系翻譯核心
-    // ==========================================
     const t = (text) => {
       if (currentLang === 'zh-TW' || !i18nDicts[currentLang]) return text;
       return i18nDicts[currentLang][text] || text;
@@ -274,20 +253,18 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.innerText = lang.label;
-        
         if (currentLang === lang.code) {
           btn.className = 'px-1 md:px-5 py-1.5 md:py-2 bg-blue-600 text-white font-bold rounded-md md:rounded-xl shadow-md transition-all text-[11px] md:text-sm flex items-center justify-center leading-tight tracking-tighter md:tracking-normal';
         } else {
           btn.className = 'px-1 md:px-5 py-1.5 md:py-2 bg-white text-slate-600 hover:bg-blue-50 hover:text-blue-600 font-bold rounded-md md:rounded-xl transition-all border border-slate-200 text-[11px] md:text-sm shadow-sm flex items-center justify-center leading-tight tracking-tighter md:tracking-normal';
         }
-
         btn.onclick = () => {
-          saveFormData(); // 切換語言前先存檔
+          saveFormData(); 
           currentLang = lang.code;
           renderLangSwitcher(); 
           updateStaticUI();     
           renderDynamicForm(schemaQuestions); 
-          restoreFormData(); // 切換完成後回填資料
+          restoreFormData(); 
         };
         container.appendChild(btn);
       });
@@ -317,9 +294,6 @@
       document.getElementById('modalCloseBtnText').innerText = t('稍後再說，先返回表單');
     }
 
-    // ==========================================
-    // Auth 狀態綁定
-    // ==========================================
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
       if (user) {
@@ -371,13 +345,11 @@
     };
     document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
 
-    // ==========================================
-    // 載入與初始化 (改由 Cloudflare Pages Functions 極速載入)
-    // ==========================================
-    // [修改] 直接使用相對路徑，指向 functions/api/form.js
     const WORKER_URL = '/api/form'; 
 
     window.addEventListener('DOMContentLoaded', async () => {
+      if (isLine || isFB || isIG) return; // 如果是內建瀏覽器，就不浪費資源載入了
+
       try {
         const response = await fetch(WORKER_URL);
         if (!response.ok) throw new Error("無法取得設定");
@@ -407,8 +379,6 @@
         renderLangSwitcher();
         updateStaticUI();
         renderDynamicForm(schemaQuestions);
-
-        // 初始化結束，若有暫存資料則自動回填
         restoreFormData();
 
         document.getElementById('loadingOverlay').classList.add('hidden');
@@ -420,9 +390,6 @@
       }
     });
 
-    // ==========================================
-    // 動態表單渲染
-    // ==========================================
     function renderDynamicForm(questions) {
       const container = document.getElementById('dynamicFields');
       container.innerHTML = '';
@@ -508,15 +475,11 @@
         container.insertAdjacentHTML('beforeend', html);
       });
 
-      // 初始化日期欄位 (若暫存資料沒有才設定預設今日)
       document.querySelectorAll('.date-auto-fill').forEach(el => {
         if (!el.value) el.value = new Date().toISOString().split('T')[0];
       });
     }
 
-    // ==========================================
-    // 提交邏輯 (包含 XSS 防護消毒與必填攔截)
-    // ==========================================
     const sanitizeInput = (str) => {
       if (typeof str !== 'string') return str;
       return str.replace(/[&<>"']/g, (m) => {
@@ -525,14 +488,10 @@
       });
     };
 
-    // 自訂必填欄位攔截與動畫提示
     submitBtn.addEventListener('click', (e) => {
       if (!form.checkValidity()) {
-        e.preventDefault(); // 阻止表單安靜失敗
-        
+        e.preventDefault(); 
         alert(t('您尚有必填欄位未完成，請檢查帶有 * 記號的項目！'));
-        
-        // 尋找第一個未填寫的元件，並將畫面滾動到該處 + 紅框閃爍提醒
         const firstInvalid = form.querySelector(':invalid');
         if (firstInvalid) {
           const card = firstInvalid.closest('.bg-white') || firstInvalid.closest('.bg-slate-50') || firstInvalid.parentElement;
@@ -545,6 +504,20 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault(); 
+
+      // 【修復 5】離線卡死防護
+      if (!navigator.onLine) {
+        alert(t('目前網路連線不穩或已斷線，請確認網路狀態後再提交！'));
+        return;
+      }
+
+      // 【修復 4】防洗版防護 (30 秒冷卻)
+      const lastSubmitTime = localStorage.getItem('lastSubmitTimestamp');
+      if (lastSubmitTime && (Date.now() - parseInt(lastSubmitTime) < 30000)) {
+        alert(t('您提交的太頻繁了！為保護系統，請稍候 30 秒再試。'));
+        return;
+      }
+
       if (!currentUser) {
         openModal();
         return; 
@@ -569,7 +542,10 @@
 
       try {
         await addDoc(collection(db, "submissions"), submissionData);
-        sessionStorage.removeItem('visitorFormData'); // 送出成功後清空暫存
+        sessionStorage.removeItem('visitorFormData'); 
+        
+        // 成功後記錄時間，啟動防洗版機制
+        localStorage.setItem('lastSubmitTimestamp', Date.now().toString());
 
         document.getElementById('formContainer').classList.add('hidden');
         document.getElementById('successMsg').classList.remove('hidden');
@@ -579,12 +555,12 @@
         alert(t('寫入失敗：') + error.message);
       } finally {
         submitBtn.disabled = false;
-        document.getElementById('submitBtnText').innerText = t('確認提交 (Confirm Submission)');
+        document.getElementById('submitBtnText').innerText = t('確認提交');
       }
     });
 
     document.getElementById('resetBtn').addEventListener('click', () => {
-      sessionStorage.removeItem('visitorFormData'); // 重置時清空暫存
+      sessionStorage.removeItem('visitorFormData'); 
       form.reset();
       document.querySelectorAll('.date-auto-fill').forEach(el => el.value = new Date().toISOString().split('T')[0]);
       document.getElementById('successMsg').classList.add('hidden');
