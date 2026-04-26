@@ -89,7 +89,7 @@
             <h3 class="flex items-center text-base md:text-xl font-black text-slate-800 mb-0.5 md:mb-1">
               <div class="w-1.5 h-5 md:h-6 bg-red-500 rounded-full mr-2 md:mr-3"></div><span id="authTitleText">身分驗證</span> <span class="text-red-500 ml-1 text-lg md:text-xl">*</span>
             </h3>
-            <p id="authDesc" class="text-xs md:text-sm font-bold text-slate-500 ml-3 md:ml-4">提交表單前需驗證 Google 帳號 (可先填寫下方資料)</p>
+            <p id="authDesc" class="text-xs md:text-sm font-bold text-slate-500 ml-3 md:ml-4">若無法登入，請改用預設瀏覽器 (Safari/Chrome) 開啟</p>
           </div>
 
           <button type="button" id="topLoginBtn" class="bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg md:rounded-xl shadow-sm transition-all flex items-center text-sm md:text-base">
@@ -277,7 +277,7 @@
       document.getElementById('successText').innerText = t(configDataCache.SUCCESS_MSG || 'Submission Successful');
 
       document.getElementById('authTitleText').innerText = t('身分驗證');
-      document.getElementById('authDesc').innerText = t('提交表單前需驗證 Google 帳號 (可先填寫下方資料)');
+      document.getElementById('authDesc').innerText = t('若無法登入，請改用預設瀏覽器 (Safari/Chrome) 開啟');
       document.getElementById('topLoginBtnText').innerText = t('登入 Google');
       document.getElementById('topLogoutBtn').innerText = t('登出');
       document.getElementById('bottomUnauthText').innerText = t('尚未登入，將無法提交表單');
