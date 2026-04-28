@@ -271,14 +271,19 @@
           ` + sectionWrapperEnd;
         } 
         else if (q.type === 'radio') {
-          const gridCols = options.length <= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'md:grid-cols-2';
+          let gridCols = '';
+          if (options.length === 2) gridCols = 'md:grid-cols-2';
+          else if (options.length === 3) gridCols = 'md:grid-cols-3';
+          else if (options.length === 4) gridCols = 'md:grid-cols-2 lg:grid-cols-4';
+          else gridCols = 'md:grid-cols-2 lg:grid-cols-3';
+
           let optsHtml = options.map((opt, i) => `
             <div class="flex">
               <input type="radio" name="${q.id}" id="${q.id}_${i}" value="${opt}" class="custom-input" ${isRequired && i === 0 ? 'required' : ''}>
               <label for="${q.id}_${i}" class="custom-label-blue flex items-center w-full p-3 md:p-4 border-2 border-slate-200 bg-slate-50/80 rounded-lg md:rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all shadow-sm">
                 <i class="far fa-circle text-slate-300 icon-unchecked text-xl md:text-2xl mr-2 md:mr-3 flex-shrink-0"></i>
                 <i class="fas fa-dot-circle text-blue-600 icon-checked text-xl md:text-2xl mr-2 md:mr-3 flex-shrink-0" style="display: none;"></i>
-                <span class="text-xs md:text-base font-bold text-slate-700 text-desc">${t(opt)}</span>
+                <span class="text-sm md:text-base font-bold text-slate-700 text-desc">${t(opt)}</span>
               </label>
             </div>
           `).join('');
@@ -292,7 +297,7 @@
                 <label for="${q.id}_${i}" class="custom-label-emerald flex items-start w-full p-4 md:p-6 bg-emerald-50/50 border-2 border-emerald-300 rounded-xl md:rounded-2xl cursor-pointer hover:bg-emerald-100 hover:border-emerald-400 transition-all shadow-sm">
                   <i class="far fa-square text-emerald-400 icon-unchecked text-xl md:text-2xl mr-3 md:mr-4 mt-0.5 flex-shrink-0"></i>
                   <i class="fas fa-check-square text-white icon-checked text-xl md:text-2xl mr-3 md:mr-4 mt-0.5 flex-shrink-0" style="display: none;"></i>
-                  <span class="text-sm md:text-lg font-black text-emerald-900 leading-snug md:leading-relaxed transition-colors text-desc">${t(opt)}</span>
+                  <span class="text-base md:text-lg font-black text-emerald-900 leading-snug md:leading-relaxed transition-colors text-desc">${t(opt)}</span>
                 </label>
               </div>
             `).join('');
@@ -305,7 +310,7 @@
                 <label for="${q.id}_${i}" class="custom-label-amber flex items-center w-full p-3 md:p-5 bg-amber-50/50 border-2 border-amber-200 rounded-lg md:rounded-xl cursor-pointer hover:bg-amber-100 hover:border-amber-300 transition-all shadow-sm">
                   <i class="far fa-square text-amber-300 icon-unchecked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0"></i>
                   <i class="fas fa-check-square text-amber-600 icon-checked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0" style="display: none;"></i>
-                  <span class="text-xs md:text-base font-bold text-amber-900 leading-tight transition-colors text-desc">${t(opt)}</span>
+                  <span class="text-sm md:text-base font-bold text-amber-900 leading-tight transition-colors text-desc">${t(opt)}</span>
                 </label>
               </div>
             `).join('');
@@ -318,7 +323,7 @@
                 <label for="${q.id}_${i}" class="custom-label-blue flex items-center w-full p-3 md:p-4 bg-slate-50/50 border-2 border-slate-200 rounded-lg md:rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50/80 transition-all shadow-sm">
                   <i class="far fa-square text-slate-300 icon-unchecked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0"></i>
                   <i class="fas fa-check-square text-blue-600 icon-checked text-lg md:text-xl mr-3 md:mr-4 flex-shrink-0" style="display: none;"></i>
-                  <span class="text-xs md:text-base font-bold text-slate-700 tracking-tight transition-colors text-desc leading-snug">${t(opt)}</span>
+                  <span class="text-sm md:text-base font-bold text-slate-700 tracking-tight transition-colors text-desc leading-snug">${t(opt)}</span>
                 </label>
               </div>
             `).join('');
