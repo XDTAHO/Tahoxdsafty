@@ -46,18 +46,6 @@
 <!-- 【修復 2】將 min-h-screen 改為 min-h-[100dvh]，完美解決 iOS Safari 底部被遮擋的問題 -->
 <body class="bg-slate-200 min-h-[100dvh] p-2 md:p-8 text-slate-800 relative">
 
-  <!-- 【修復 3】LINE / FB 內建瀏覽器阻擋與提示畫面 -->
-  <div id="inAppBrowserWarning" class="fixed inset-0 bg-slate-900 z-[9999] hidden flex-col items-center justify-center text-white p-6 text-center">
-    <i class="fas fa-external-link-alt text-6xl md:text-8xl mb-6 text-blue-400"></i>
-    <h2 class="text-2xl md:text-4xl font-black mb-4 tracking-wide">請在預設瀏覽器中開啟</h2>
-    <p class="text-sm md:text-lg text-slate-300 mb-8 leading-relaxed font-bold">
-      您目前使用的應用程式內建瀏覽器無法支援 Google 安全登入。<br><br>
-      請點擊右上角 (或右下角) 的選單 <span class="text-2xl font-black mx-1">⋮</span> 或 <span class="text-2xl font-black mx-1">⋯</span><br>
-      選擇 <span class="text-white bg-blue-600 px-3 py-1 rounded-lg mx-1 shadow-sm">以預設瀏覽器開啟</span><br>
-      (Safari / Chrome) 以繼續填寫表單。
-    </p>
-  </div>
-
   <div class="max-w-4xl mx-auto" id="mainAppWrapper">
     <!-- 整個表單的容器 -->
     <div id="formContainer">
@@ -83,43 +71,7 @@
         
         <div id="langSwitcher" class="grid grid-cols-4 md:flex md:flex-wrap gap-1.5 md:gap-2 pb-2 md:pb-3 border-b-2 border-slate-200"></div>
 
-        <!-- 頂部 Google 驗證區塊 -->
-        <div class="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4">
-          <div>
-            <h3 class="flex items-center text-base md:text-xl font-black text-slate-800 mb-0.5 md:mb-1">
-              <div class="w-1.5 h-5 md:h-6 bg-red-500 rounded-full mr-2 md:mr-3"></div><span id="authTitleText">身分驗證</span> <span class="text-red-500 ml-1 text-lg md:text-xl">*</span>
-            </h3>
-            <p id="authDesc" class="text-xs md:text-sm font-bold text-slate-500 ml-3 md:ml-4">若無法登入，請改用預設瀏覽器 (Safari/Chrome) 開啟</p>
-          </div>
-
-          <button type="button" id="topLoginBtn" class="bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg md:rounded-xl shadow-sm transition-all flex items-center text-sm md:text-base">
-            <i class="fab fa-google text-red-500 mr-2 md:mr-3 text-base md:text-lg"></i> <span id="topLoginBtnText">登入 Google</span>
-          </button>
-
-          <div id="topUserInfo" class="hidden flex items-center space-x-2 md:space-x-3 bg-slate-100 py-1.5 md:py-2 px-3 md:px-4 rounded-lg md:rounded-xl border border-slate-200">
-            <img id="topUserAvatar" src="" class="w-8 h-8 md:w-10 md:h-10 rounded-full shadow-sm" alt="Avatar">
-            <div class="text-left">
-              <p id="topUserName" class="text-xs md:text-sm font-black text-slate-800 leading-tight"></p>
-              <p id="topUserEmail" class="text-[10px] md:text-xs font-bold text-slate-500"></p>
-            </div>
-            <button type="button" id="topLogoutBtn" class="ml-1 md:ml-2 text-[10px] md:text-xs font-bold text-slate-400 hover:text-red-500 underline transition-colors">登出</button>
-          </div>
-        </div>
-
         <div id="dynamicFields" class="space-y-6 md:space-y-8"></div>
-
-        <div class="pt-2 md:pt-4 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-300">
-          <div id="bottomUnauth" class="flex items-center space-x-2 md:space-x-3">
-            <span id="bottomUnauthText" class="text-xs md:text-sm font-bold text-slate-500">尚未登入，將無法提交表單</span>
-            <button type="button" id="bottomLoginBtn" class="text-[10px] md:text-xs bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 py-1 md:py-1.5 px-2 md:px-3 rounded-md md:rounded-lg flex items-center font-bold">
-              <i class="fab fa-google text-red-500 mr-1.5 md:mr-2"></i><span id="bottomLoginBtnText">登入</span>
-            </button>
-          </div>
-          <div id="bottomAuth" class="hidden flex items-center space-x-1.5 md:space-x-2">
-            <i class="fas fa-check-circle text-emerald-500 text-sm"></i>
-            <span class="text-xs md:text-sm font-bold text-slate-600"><span id="bottomAuthText1">已使用</span> <span id="bottomUserEmail" class="text-slate-800 mx-0.5 md:mx-1"></span> <span id="bottomAuthText2">登入</span></span>
-          </div>
-        </div>
 
         <button type="submit" id="submitBtn" class="w-full bg-blue-800 hover:bg-black text-white font-black py-4 md:py-6 rounded-xl md:rounded-3xl shadow-lg md:shadow-2xl text-lg md:text-2xl transition-all flex justify-center items-center">
           <span id="submitBtnText">確認提交</span>
@@ -140,40 +92,10 @@
     </div>
   </div>
 
-  <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center opacity-0 transition-opacity duration-300 px-4">
-    <div class="bg-white p-6 md:p-10 rounded-2xl md:rounded-3xl shadow-2xl max-w-sm w-full text-center transform scale-95 transition-transform duration-300" id="loginModalContent">
-      <i class="fas fa-user-lock text-5xl md:text-6xl text-blue-600 mb-4 md:mb-6"></i>
-      <h3 id="modalTitle" class="text-xl md:text-2xl font-black text-slate-800 mb-2 md:mb-3">需要登入以驗證身分</h3>
-      <p class="text-slate-500 font-bold mb-6 md:mb-8 text-xs md:text-sm leading-relaxed">
-        <span id="modalDesc1">請先登入您的 Google 帳號才能提交表單。</span><br>
-        <span id="modalDesc2">別擔心，您剛剛填寫的資料皆已保留。</span>
-      </p>
-      <button type="button" id="modalLoginBtn" class="w-full bg-white border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 font-black py-3 md:py-4 rounded-lg md:rounded-xl shadow-sm transition-all flex items-center justify-center text-base md:text-lg mb-3 md:mb-4">
-        <i class="fab fa-google text-red-500 mr-2 md:mr-3 text-lg md:text-xl"></i> <span id="modalLoginBtnText">立即登入 Google</span>
-      </button>
-      <button type="button" id="modalCloseBtn" class="text-xs md:text-sm font-bold text-slate-400 hover:text-slate-600 underline tracking-wide">
-        <span id="modalCloseBtnText">稍後再說，先返回表單</span>
-      </button>
-    </div>
-  </div>
-
   <!-- Firebase 與核心邏輯 -->
   <script type="module">
-    // 【修復 3 邏輯】一載入就偵測是否為內建瀏覽器
-    const ua = navigator.userAgent || navigator.vendor || window.opera;
-    const isLine = (ua.indexOf("Line") > -1);
-    const isFB = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
-    const isIG = (ua.indexOf("Instagram") > -1);
-    
-    if (isLine || isFB || isIG) {
-      document.getElementById('inAppBrowserWarning').classList.remove('hidden');
-      document.getElementById('inAppBrowserWarning').classList.add('flex');
-      document.getElementById('mainAppWrapper').classList.add('hidden'); // 隱藏主程式
-    }
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDwAD3O6uNDWQoNITdeOEc4LqfLKC_IZRQ",
@@ -186,15 +108,12 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
 
     const form = document.getElementById('safetyForm');
     const submitBtn = document.getElementById('submitBtn');
 
     let schemaQuestions = [];
     let configDataCache = {};
-    let currentUser = null; 
     let currentLang = 'zh-TW'; 
     let supportedLangs = [{code: 'zh-TW', label: '繁體中文'}]; 
     let i18nDicts = {}; 
@@ -275,82 +194,15 @@
       document.getElementById('mainTitle').innerText = t(configDataCache.FORM_TITLE || '訪客風險危害告知');
       document.getElementById('subTitle').innerText = t(configDataCache.FORM_SUBTITLE || 'Visitor Safety and Hazard Notification');
       document.getElementById('successText').innerText = t(configDataCache.SUCCESS_MSG || 'Submission Successful');
-
-      document.getElementById('authTitleText').innerText = t('身分驗證');
-      document.getElementById('authDesc').innerText = t('若無法登入，請改用預設瀏覽器 (Safari/Chrome) 開啟');
-      document.getElementById('topLoginBtnText').innerText = t('登入 Google');
-      document.getElementById('topLogoutBtn').innerText = t('登出');
-      document.getElementById('bottomUnauthText').innerText = t('尚未登入，將無法提交表單');
-      document.getElementById('bottomLoginBtnText').innerText = t('登入');
-      document.getElementById('bottomAuthText1').innerText = t('已使用');
-      document.getElementById('bottomAuthText2').innerText = t('登入');
       document.getElementById('submitBtnText').innerText = t('確認提交');
       
       document.getElementById('successTitle').innerText = t('提交成功！');
       document.getElementById('resetBtnText').innerText = t('填寫下一份');
-      document.getElementById('modalTitle').innerText = t('需要登入以驗證身分');
-      document.getElementById('modalDesc1').innerText = t('請先登入您的 Google 帳號才能提交表單。');
-      document.getElementById('modalDesc2').innerText = t('別擔心，您剛剛填寫的資料皆已保留。');
-      document.getElementById('modalLoginBtnText').innerText = t('立即登入 Google');
-      document.getElementById('modalCloseBtnText').innerText = t('稍後再說，先返回表單');
     }
-
-    onAuthStateChanged(auth, (user) => {
-      currentUser = user;
-      if (user) {
-        document.getElementById('topLoginBtn').classList.add('hidden');
-        document.getElementById('topUserInfo').classList.remove('hidden');
-        document.getElementById('topUserName').innerText = user.displayName || '訪客';
-        document.getElementById('topUserEmail').innerText = user.email;
-        document.getElementById('topUserAvatar').src = user.photoURL || 'https://via.placeholder.com/40';
-        
-        document.getElementById('bottomUnauth').classList.add('hidden');
-        document.getElementById('bottomAuth').classList.remove('hidden');
-        document.getElementById('bottomUserEmail').innerText = user.email;
-        closeModal();
-      } else {
-        document.getElementById('topLoginBtn').classList.remove('hidden');
-        document.getElementById('topUserInfo').classList.add('hidden');
-        document.getElementById('bottomUnauth').classList.remove('hidden');
-        document.getElementById('bottomAuth').classList.add('hidden');
-      }
-    });
-
-    const handleLogin = async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (error) {
-        console.error("登入錯誤:", error);
-        alert(t('登入失敗，請稍後再試！') + "\n" + error.message);
-      }
-    };
-
-    document.getElementById('topLoginBtn').addEventListener('click', handleLogin);
-    document.getElementById('bottomLoginBtn').addEventListener('click', handleLogin);
-    document.getElementById('modalLoginBtn').addEventListener('click', handleLogin);
-    document.getElementById('topLogoutBtn').addEventListener('click', () => signOut(auth));
-
-    const loginModal = document.getElementById('loginModal');
-    const loginModalContent = document.getElementById('loginModalContent');
-    const openModal = () => {
-      loginModal.classList.remove('hidden');
-      setTimeout(() => {
-        loginModal.classList.remove('opacity-0');
-        loginModalContent.classList.remove('scale-95');
-      }, 10);
-    };
-    const closeModal = () => {
-      loginModal.classList.add('opacity-0');
-      loginModalContent.classList.add('scale-95');
-      setTimeout(() => loginModal.classList.add('hidden'), 300);
-    };
-    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
 
     const WORKER_URL = '/api/form'; 
 
     window.addEventListener('DOMContentLoaded', async () => {
-      if (isLine || isFB || isIG) return; // 如果是內建瀏覽器，就不浪費資源載入了
-
       try {
         const response = await fetch(WORKER_URL);
         if (!response.ok) throw new Error("無法取得設定");
@@ -519,11 +371,6 @@
         return;
       }
 
-      if (!currentUser) {
-        openModal();
-        return; 
-      }
-
       submitBtn.disabled = true;
       // [修正] 精準替換 span 的內容，避免破壞 DOM 結構導致翻譯函數報錯
       document.getElementById('submitBtnText').innerHTML = '<i class="fas fa-spinner fa-spin mr-2 md:mr-3"></i>' + t('正在儲存中 (Saving)...');
@@ -531,7 +378,7 @@
       const formData = new FormData(form);
       const submissionData = { 
         createdAt: serverTimestamp(),
-        submitterEmail: currentUser.email,
+        submitterEmail: 'anonymous', // 移除登入機制後，紀錄為匿名
       };
 
       schemaQuestions.forEach(q => {
